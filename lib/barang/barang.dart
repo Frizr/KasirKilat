@@ -14,6 +14,14 @@ class Barang extends StatefulWidget {
 
 class _BarangState extends State<Barang> {
   Getbarang b = Get.put(Getbarang());
+  bool isSearching = false;
+  TextEditingController searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +33,34 @@ class _BarangState extends State<Barang> {
           appBar: AppBar(
             elevation: 0,
             backgroundColor: Colors.transparent,
-            title: const Text(
-              'Produk',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
+            title: isSearching
+                ? TextField(
+                    controller: searchController,
+                    autofocus: true,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 16,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Cari Produk...',
+                      hintStyle: TextStyle(
+                        color: AppColors.textSecondary.withOpacity(0.5),
+                        fontSize: 16,
+                      ),
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (val) {
+                      b.setSearchQueryBarang(val);
+                    },
+                  )
+                : const Text(
+                    'Produk',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
             actions: [
               Container(
                 margin: const EdgeInsets.only(right: 8),
@@ -41,8 +69,16 @@ class _BarangState extends State<Barang> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.search, color: AppColors.navy),
+                  onPressed: () {
+                    setState(() {
+                      isSearching = !isSearching;
+                      if (!isSearching) {
+                        searchController.clear();
+                        b.setSearchQueryBarang('');
+                      }
+                    });
+                  },
+                  icon: Icon(isSearching ? Icons.close : Icons.search, color: AppColors.navy),
                 ),
               ),
             ],

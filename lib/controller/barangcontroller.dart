@@ -9,6 +9,59 @@ class Getbarang extends GetxController {
   List temu = [];
   List beli = [];
   List sortgl = [];
+  String searchQueryBarang = '';
+  String sortOptionBarang = 'terbaru';
+
+  void setSearchQueryBarang(String q) {
+    searchQueryBarang = q.toLowerCase();
+    update();
+  }
+
+  void setSortOptionBarang(String option) {
+    sortOptionBarang = option;
+    update();
+  }
+
+  List get displayBarang {
+    List result = List.from(barang);
+    if (searchQueryBarang.isNotEmpty) {
+      result = result.where((element) {
+        try {
+          final data = element['data'] as Map<String, dynamic>?;
+          final name = (data?['nama'] ?? '').toString().toLowerCase();
+          final code = (data?['bar'] ?? '').toString().toLowerCase();
+          return name.contains(searchQueryBarang) || code.contains(searchQueryBarang);
+        } catch (e) {
+          return element.toString().toLowerCase().contains(searchQueryBarang);
+        }
+      }).toList();
+    }
+    
+    // Sort
+    if (sortOptionBarang == 'lama') {
+      result.sort((a, b) {
+         final dateA = (a['data']?['tgl'] as Timestamp?)?.toDate() ?? DateTime.now();
+         final dateB = (b['data']?['tgl'] as Timestamp?)?.toDate() ?? DateTime.now();
+         return dateA.compareTo(dateB);
+      });
+    } else if (sortOptionBarang == 'terbaru') {
+      result.sort((a, b) {
+         final dateA = (a['data']?['tgl'] as Timestamp?)?.toDate() ?? DateTime.now();
+         final dateB = (b['data']?['tgl'] as Timestamp?)?.toDate() ?? DateTime.now();
+         return dateB.compareTo(dateA);
+      });
+    } else if (sortOptionBarang == 'stock banyak') {
+      result.sort((a, b) => ((b['data']?['jumlah'] ?? 0) as num).compareTo((a['data']?['jumlah'] ?? 0) as num));
+    } else if (sortOptionBarang == 'stock sedikit') {
+      result.sort((a, b) => ((a['data']?['jumlah'] ?? 0) as num).compareTo((b['data']?['jumlah'] ?? 0) as num));
+    } else if (sortOptionBarang == 'harga tinggi') {
+      result.sort((a, b) => ((b['data']?['harga'] ?? 0) as num).compareTo((a['data']?['harga'] ?? 0) as num));
+    } else if (sortOptionBarang == 'harga rendah') {
+      result.sort((a, b) => ((a['data']?['harga'] ?? 0) as num).compareTo((b['data']?['harga'] ?? 0) as num));
+    }
+    
+    return result;
+  }
 
   hapusbeliall() {
     beli.clear();

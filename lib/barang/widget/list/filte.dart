@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cashier/controller/barangcontroller.dart';
 import 'package:cashier/manage/listfilter.dart';
 import 'package:cashier/theme/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -39,27 +40,34 @@ class _FilteState extends State<Filte> {
               runSpacing: 8,
               children: [
                 for (var a in filters)
-                  InkWell(
-                    onTap: () {
-                      Get.back();
-                    },
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.navy.withOpacity(0.08),
+                  GetBuilder<Getbarang>(
+                    init: Getbarang(),
+                    builder: (b) {
+                      bool isSelected = b.sortOptionBarang == a;
+                      return InkWell(
+                        onTap: () {
+                          b.setSortOptionBarang(a);
+                          Get.back();
+                        },
                         borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        a,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.navy,
-                          fontWeight: FontWeight.w600,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppColors.navy : AppColors.navy.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            a,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isSelected ? Colors.white : AppColors.navy,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    }
                   ),
               ],
             ),

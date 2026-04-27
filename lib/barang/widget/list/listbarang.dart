@@ -68,7 +68,7 @@ class _ListBarangState extends State<ListBarang> {
           GetBuilder<Getbarang>(
             init: Getbarang(),
             builder: (val) {
-              if (val.barang.isEmpty) {
+              if (val.displayBarang.isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.only(top: 40),
                   child: Center(
@@ -94,7 +94,7 @@ class _ListBarangState extends State<ListBarang> {
               }
               return Column(
                 children: [
-                  for (var a in val.barang)
+                  for (var a in val.displayBarang)
                     Expa(
                       kode: (a['data'] != null && a['data']['bar'] != null)
                           ? (a['data']['bar'] ?? '').toString()
