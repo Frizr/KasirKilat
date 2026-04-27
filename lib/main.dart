@@ -55,12 +55,65 @@ class _MainWrapperState extends State<MainWrapper> {
       PageController(initialPage: 0, keepPage: true);
   final Getbarang b = Get.put(Getbarang());
   final TransaksiController t = Get.put(TransaksiController());
+  bool _isRefreshing = false;
+  double _verticalDrag = 0.0;
 
   @override
   void initState() {
     b.getbarang();
     t.gettransaksi();
     super.initState();
+  }
+
+  Future<void> _refreshCurrentPage() async {
+    if (_isRefreshing) return;
+    setState(() {
+      _isRefreshing = true;
+    });
+
+    try {
+      // call relevant controller methods depending on current page
+      switch (_currentIndex) {
+        case 0:
+          b.getbarang();
+          t.gettransaksi();
+          break;
+        case 1:
+          t.gettransaksi();
+          break;
+        case 2:
+          b.getbarang();
+          break;
+        case 3:
+          t.gettransaksi();
+          break;
+        default:
+          b.getbarang();
+          t.gettransaksi();
+      }
+
+      // small delay to allow UI to show refresh indicator
+      await Future.delayed(const Duration(milliseconds: 350));
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Data berhasil diperbarui')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memperbarui: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRefreshing = false;
+          _verticalDrag = 0.0;
+        });
+      }
+    }
   }
 
   void _goToPage(int index) {
@@ -78,20 +131,46 @@ class _MainWrapperState extends State<MainWrapper> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgLight,
-      body: PageView(
-        physics: const BouncingScrollPhysics(),
-        controller: _pageController,
+      body: Stack(
         children: [
-          Dashboard(goToPage: _goToPage),
-          Transaksi(),
-          Barang(),
-          Laporan(),
+          GestureDetector(
+            onVerticalDragUpdate: (details) {
+              _verticalDrag += details.delta.dy;
+            },
+            onVerticalDragEnd: (details) {
+              if (_verticalDrag < -120) {
+                _refreshCurrentPage();
+              } else if (_verticalDrag > 120) {
+                _refreshCurrentPage();
+              }
+              _verticalDrag = 0.0;
+            },
+            child: PageView(
+              physics: const BouncingScrollPhysics(),
+              controller: _pageController,
+              children: [
+                Dashboard(goToPage: _goToPage),
+                Transaksi(),
+                Barang(),
+                Laporan(),
+              ],
+              onPageChanged: (value) {
+                setState(() {
+                  _currentIndex = value;
+                });
+              },
+            ),
+          ),
+          if (_isRefreshing)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.25),
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
         ],
-        onPageChanged: (value) {
-          setState(() {
-            _currentIndex = value;
-          });
-        },
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -116,8 +195,8 @@ class _MainWrapperState extends State<MainWrapper> {
                     Icons.swap_horiz_rounded, 'Transaksi'),
                 _buildNavItem(2, Icons.inventory_2_rounded,
                     Icons.inventory_2_outlined, 'Produk'),
-                _buildNavItem(
-                    3, Icons.bar_chart_rounded, Icons.bar_chart_rounded, 'Laporan'),
+                _buildNavItem(3, Icons.bar_chart_rounded,
+                    Icons.bar_chart_rounded, 'Laporan'),
               ],
             ),
           ),
@@ -140,7 +219,8 @@ class _MainWrapperState extends State<MainWrapper> {
           vertical: 8,
         ),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.navy.withOpacity(0.1) : Colors.transparent,
+          color:
+              isActive ? AppColors.navy.withOpacity(0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(

@@ -5,7 +5,7 @@ import 'package:cashier/notification/notification_helper.dart';
 import 'package:cashier/theme/app_colors.dart';
 import 'package:cashier/transaksi/history.dart';
 import 'package:cashier/transaksi/widget/listsearch.dart';
-import 'package:cashier/transaksi/widget/search.dart';
+// search page not needed when embedding product list
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,6 +17,7 @@ class Transaksi extends StatefulWidget {
 class _TransaksiState extends State<Transaksi> {
   TransaksiController t = Get.put(TransaksiController());
   Getbarang b = Get.put(Getbarang());
+  final TextEditingController _searchController = TextEditingController();
 
   void _showPaymentDialog(int totalBayar) {
     String selectedMetode = 'Cash';
@@ -296,6 +297,12 @@ class _TransaksiState extends State<Transaksi> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgLight,
@@ -358,128 +365,197 @@ class _TransaksiState extends State<Transaksi> {
       body: GetBuilder<Getbarang>(
         init: Getbarang(),
         builder: (val) {
-          final a = val.beli;
-          return a.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          final cart = val.beli;
+          Widget productListWidget() {
+            // if user typed something, show search results (temu), otherwise show all products
+            final queryNotEmpty = _searchController.text.trim().isNotEmpty;
+            final hasil = queryNotEmpty ? val.temu : val.barang;
+
+            if ((hasil == null || hasil.isEmpty) && queryNotEmpty) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 24),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.search_off_rounded,
+                      size: 48,
+                      color: AppColors.textSecondary.withOpacity(0.3),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Barang tidak ditemukan',
+                      style: TextStyle(
+                        color: AppColors.textSecondary.withOpacity(0.5),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  for (var a in hasil)
+                    ListSearch(
+                      kode: (a['data'] != null && (a['data']['bar'] ?? '') != null)
+                          ? (a['data']['bar'] ?? '').toString()
+                          : (a['bar'] ?? '').toString(),
+                      id: (a['id'] ?? '').toString(),
+                      nama: (a['data'] != null && (a['data']['nama'] ?? '') != null)
+                          ? (a['data']['nama'] ?? '').toString()
+                          : (a['nama'] ?? '').toString(),
+                      harga: (a['data'] != null && a['data']['harga'] != null)
+                          ? (a['data']['harga'] as num).toInt()
+                          : 0,
+                      stock: (a['data'] != null && a['data']['jumlah'] != null)
+                          ? (a['data']['jumlah'] as num).toInt()
+                          : 0,
+                      x: false,
+                      i: 0,
+                    ),
+                ],
+              ),
+            );
+          }
+
+          return Column(
+            children: [
+              // Search bar
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                color: Colors.transparent,
+                child: Container(
+                  height: 48,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.navy.withOpacity(0.06),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
                     children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: AppColors.navy.withOpacity(0.05),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.shopping_cart_outlined,
-                          size: 48,
-                          color: AppColors.navy.withOpacity(0.3),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Belum ada barang',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textSecondary.withOpacity(0.7),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Tekan + untuk menambah barang',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary.withOpacity(0.5),
+                      const Icon(Icons.search, color: AppColors.textSecondary, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (value) {
+                            setState(() {
+                              b.cari(cari: value);
+                            });
+                          },
+                          cursorColor: AppColors.navy,
+                          style: const TextStyle(fontSize: 14),
+                          decoration: const InputDecoration(
+                            hintText: 'Cari barang...',
+                            hintStyle: TextStyle(color: AppColors.textSecondary),
+                            border: InputBorder.none,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                )
-              : SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.only(bottom: 100),
-                  child: Column(
-                    children: [
-                      for (var i = 0; i < val.beli.length; i++)
-                        ListSearch(
-                          kode: (a[i]['kode'] ?? '').toString(),
-                          id: (a[i]['id'] ?? '').toString(),
-                          nama: (a[i]['nama'] ?? '').toString(),
-                          harga: (a[i]['harga'] as num?)?.toInt() ?? 0,
-                          stock: (a[i]['jumlah'] as num?)?.toInt() ?? 0,
-                          x: true,
-                          i: i,
-                          jumbel:
-                              (a[i]['jumlahbeli'] as num?)?.toInt() ?? 0,
+                ),
+              ),
+              // Content area
+              Expanded(
+                child: Column(
+                  children: [
+                    // selected items (cart)
+                    if (cart.isNotEmpty)
+                      Expanded(
+                        flex: 4,
+                        child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Column(
+                            children: [
+                              for (var i = 0; i < cart.length; i++)
+                                ListSearch(
+                                  kode: (cart[i]['kode'] ?? '').toString(),
+                                  id: (cart[i]['idb'] ?? cart[i]['id'] ?? '').toString(),
+                                  nama: (cart[i]['nama'] ?? '').toString(),
+                                  harga: (cart[i]['harga'] as num?)?.toInt() ?? 0,
+                                  stock: (cart[i]['jumlah'] as num?)?.toInt() ?? 0,
+                                  x: true,
+                                  i: i,
+                                  jumbel: (cart[i]['jumlahbeli'] as num?)?.toInt() ?? 0,
+                                ),
+                            ],
+                          ),
                         ),
-                    ],
-                  ),
-                );
+                      ),
+                    // product list
+                    Expanded(
+                      flex: 6,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: productListWidget(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
         },
       ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          GetBuilder<Getbarang>(
-            init: Getbarang(),
-            builder: (val) {
-              int totalBayar = 0;
-              val.beli.forEach((item) {
-                totalBayar += (item['totharga'] as num).toInt();
-              });
-              return val.beli.isNotEmpty
-                  ? InkWell(
-                      onTap: () {
-                        if (totalBayar == 0) return;
-                        _showPaymentDialog(totalBayar);
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(left: 30),
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.navy.withOpacity(0.3),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+      floatingActionButton: GetBuilder<Getbarang>(
+        init: Getbarang(),
+        builder: (val) {
+          int totalBayar = 0;
+          val.beli.forEach((item) {
+            totalBayar += (item['totharga'] as num).toInt();
+          });
+          return val.beli.isNotEmpty
+              ? InkWell(
+                  onTap: () {
+                    if (totalBayar == 0) return;
+                    _showPaymentDialog(totalBayar);
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(left: 30),
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.navy.withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
-                        height: 48,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.payment_rounded,
-                                color: Colors.white, size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              uang.format(totalBayar),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
+                      ],
+                    ),
+                    height: 48,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.payment_rounded, color: Colors.white, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          uang.format(totalBayar),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
                         ),
-                      ),
-                    )
-                  : const SizedBox(width: 40);
-            },
-          ),
-          FloatingActionButton(
-            backgroundColor: AppColors.teal,
-            onPressed: () {
-              Get.to(() => Search(),
-                  transition: Transition.rightToLeftWithFade);
-            },
-            child: const Icon(Icons.add, color: Colors.white),
-          ),
-        ],
+                      ],
+                    ),
+                  ),
+                )
+              : const SizedBox(width: 40);
+        },
       ),
     );
   }

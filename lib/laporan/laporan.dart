@@ -411,7 +411,7 @@ class _LaporanState extends State<Laporan> {
 
   Widget _buildPembukuan(List filteredTrx) {
     // Group transactions by date
-    Map<String, List<Map<String, dynamic>>> grouped = {};
+    Map<String, List<dynamic>> grouped = {};
     for (var wrap in filteredTrx) {
       var trx = wrap['data'] as Map<String, dynamic>;
       DateTime? tglDate;
@@ -423,7 +423,7 @@ class _LaporanState extends State<Laporan> {
       if (tglDate == null) continue;
       String dateKey = DateFormat('yyyy-MM-dd').format(tglDate);
       grouped.putIfAbsent(dateKey, () => []);
-      grouped[dateKey]!.add(trx);
+      grouped[dateKey]!.add(wrap);
     }
 
     if (grouped.isEmpty) {
@@ -467,18 +467,23 @@ class _LaporanState extends State<Laporan> {
           ...sortedDates.take(7).map((dateKey) {
             final dayTrx = grouped[dateKey]!;
             int dayTotal = 0;
-            for (var trx in dayTrx) {
+            for (var wrap in dayTrx) {
+              var trx = wrap['data'] as Map<String, dynamic>;
               dayTotal += (trx['bayar'] as num).toInt();
             }
             DateTime date = DateTime.parse(dateKey);
             bool isToday = dateKey ==
                 DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isToday
+            return GestureDetector(
+              onTap: () {
+                _showDailyTransactions(context, date, dayTrx);
+              },
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isToday
                     ? AppColors.teal.withOpacity(0.05)
                     : AppColors.bgLight,
                 borderRadius: BorderRadius.circular(10),
@@ -555,14 +560,77 @@ class _LaporanState extends State<Laporan> {
                   ),
                 ],
               ),
-            );
+            ));
           }),
         ],
       ),
     );
   }
 
+  void _showDailyTransactions(BuildContext context, DateTime date, List<dynamic> dayTrx) {
+    String dateStr = DateFormat('dd MMMM yyyy', 'id_ID').format(date);
+    Get.bottomSheet(
+      Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Transaksi $dateStr',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView.builder(
+                itemCount: dayTrx.length,
+                itemBuilder: (context, index) {
+                  var wrap = dayTrx[index];
+                  var trx = wrap['data'] as Map<String, dynamic>;
+                  var bayar = (trx['bayar'] as num?)?.toInt() ?? 0;
+                  var id = wrap['id'] ?? 'Unknown';
+                  var tglDate = trx['tgl']?.toDate();
+                  String timeStr = tglDate != null ? DateFormat('HH:mm').format(tglDate) : '';
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const CircleAvatar(
+                      backgroundColor: AppColors.bgLight,
+                      child: Icon(Icons.receipt, color: AppColors.navy),
+                    ),
+                    title: Text(
+                      'Transaksi $id',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                    subtitle: Text(timeStr, style: const TextStyle(fontSize: 11)),
+                    trailing: Text(
+                      uang.format(bayar),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.teal,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+      ignoreSafeArea: false,
+    );
+  }
+
   Widget _buildTopProducts(
+
       List<MapEntry<String, Map<String, dynamic>>> entries) {
     if (entries.isEmpty) {
       return Container(

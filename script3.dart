@@ -1,0 +1,1 @@
+import 'dart:io'; void main() { var f = File('lib/laporan/laporan.dart'); var lines = f.readAsLinesSync(); lines[562] = lines[562].replaceFirst(');', '));'); f.writeAsStringSync(lines.join('\r\n')); }
