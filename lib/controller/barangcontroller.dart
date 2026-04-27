@@ -81,16 +81,11 @@ class Getbarang extends GetxController {
                 'data': res.data(),
               },
             );
-            update();
-            // print(barang);
-            // update();
           },
         );
         update();
       },
     );
-
-    update();
   }
 
   addbarang(
@@ -128,20 +123,20 @@ class Getbarang extends GetxController {
   deletbarang({required String id, required String nama}) async {
     await dbbarang.doc(id).delete();
     Get.rawSnackbar(
-      margin: EdgeInsets.all(15),
+      margin: const EdgeInsets.all(15),
       borderRadius: 15,
       backgroundColor: Colors.red,
       forwardAnimationCurve: Curves.elasticInOut,
       reverseAnimationCurve: Curves.elasticOut,
       messageText: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.delete_outline_rounded,
             color: Colors.white,
           ),
           Text(
             "$nama berhasil dihapus",
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
             ),
           ),
@@ -149,5 +144,36 @@ class Getbarang extends GetxController {
       ),
     );
     update();
+  }
+
+  /// Get products with low stock
+  List<Map<String, dynamic>> getLowStockProducts({int threshold = 5}) {
+    List<Map<String, dynamic>> lowStock = [];
+    for (var item in barang) {
+      final data = item['data'] as Map<String, dynamic>?;
+      if (data != null) {
+        int stock = (data['jumlah'] as num?)?.toInt() ?? 0;
+        if (stock <= threshold) {
+          lowStock.add({
+            'id': item['id'],
+            'nama': data['nama'] ?? '',
+            'stock': stock,
+          });
+        }
+      }
+    }
+    return lowStock;
+  }
+
+  /// Get total stock count
+  int getTotalStock() {
+    int total = 0;
+    for (var item in barang) {
+      final data = item['data'] as Map<String, dynamic>?;
+      if (data != null) {
+        total += (data['jumlah'] as num?)?.toInt() ?? 0;
+      }
+    }
+    return total;
   }
 }

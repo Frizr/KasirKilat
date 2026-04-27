@@ -1,5 +1,5 @@
-
 import 'package:cashier/controller/barangcontroller.dart';
+import 'package:cashier/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,57 +14,104 @@ class _TotalUpState extends State<TotalUp> {
     return GetBuilder<Getbarang>(
       init: Getbarang(),
       builder: (val) {
-        int b = 0;
-        val.barang.forEach((item) {
-          b += (item['data']['jumlah'] as num).toInt();
-        });
+        int totalStock = val.getTotalStock();
         return Row(
           children: [
-            Container(
-              padding: EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Jenis barang",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.navy.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                  ),
-                  Text(
-                    val.barang.length.toString(),
-                    style: TextStyle(
-                      fontSize: 30,
-                      color: Colors.blueAccent,
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.category_rounded,
+                          color: Colors.white, size: 18),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Jenis Barang',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      val.barang.length.toString(),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            SizedBox(
-              width: 30,
-            ),
-            Container(
-              padding: EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Jumlah stock",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: AppColors.tealGradient,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.teal.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                  ),
-                  Text(
-                    b.toString(),
-                    style: TextStyle(
-                      fontSize: 30,
-                      color: Colors.green,
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.inventory_rounded,
+                          color: Colors.white, size: 18),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Total Stok',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      totalStock.toString(),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

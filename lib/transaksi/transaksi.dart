@@ -1,12 +1,13 @@
 import 'package:cashier/controller/barangcontroller.dart';
 import 'package:cashier/controller/transaksicontroller.dart';
 import 'package:cashier/manage/formater.dart';
+import 'package:cashier/notification/notification_helper.dart';
+import 'package:cashier/theme/app_colors.dart';
 import 'package:cashier/transaksi/history.dart';
 import 'package:cashier/transaksi/widget/listsearch.dart';
 import 'package:cashier/transaksi/widget/search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-// lottie animation removed per user request
 
 class Transaksi extends StatefulWidget {
   @override
@@ -16,42 +17,341 @@ class Transaksi extends StatefulWidget {
 class _TransaksiState extends State<Transaksi> {
   TransaksiController t = Get.put(TransaksiController());
   Getbarang b = Get.put(Getbarang());
+
+  void _showPaymentDialog(int totalBayar) {
+    String selectedMetode = 'Cash';
+    TextEditingController cashController = TextEditingController();
+    int kembalian = 0;
+    bool showKembalian = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Pembayaran',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total',
+                          style: TextStyle(color: Colors.white70, fontSize: 14),
+                        ),
+                        Text(
+                          uang.format(totalBayar),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Metode Pembayaran',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _paymentChip('Cash', Icons.money_rounded,
+                          selectedMetode == 'Cash', () {
+                        setModalState(() {
+                          selectedMetode = 'Cash';
+                          showKembalian = false;
+                        });
+                      }),
+
+                      _paymentChip('QRIS', Icons.qr_code_rounded,
+                          selectedMetode == 'QRIS', () {
+                        setModalState(() {
+                          selectedMetode = 'QRIS';
+                          showKembalian = false;
+                        });
+                      }),
+                    ],
+                  ),
+                  if (selectedMetode == 'Cash') ...[
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Nominal Bayar',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      height: 50,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: AppColors.bgLight,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.teal.withOpacity(0.3),
+                        ),
+                      ),
+                      child: TextField(
+                        controller: cashController,
+                        keyboardType: TextInputType.number,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        decoration: const InputDecoration(
+                          hintText: 'Masukkan nominal',
+                          border: InputBorder.none,
+                          prefixText: 'Rp. ',
+                          prefixStyle: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          int nominal = int.tryParse(value) ?? 0;
+                          setModalState(() {
+                            kembalian = nominal - totalBayar;
+                            showKembalian = nominal > 0;
+                          });
+                        },
+                      ),
+                    ),
+                    if (showKembalian) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: kembalian >= 0
+                              ? AppColors.success.withOpacity(0.1)
+                              : AppColors.danger.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              kembalian >= 0 ? 'Kembalian' : 'Kurang',
+                              style: TextStyle(
+                                color: kembalian >= 0
+                                    ? AppColors.success
+                                    : AppColors.danger,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              uang.format(kembalian.abs()),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: kembalian >= 0
+                                    ? AppColors.success
+                                    : AppColors.danger,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: (selectedMetode == 'Cash' &&
+                              cashController.text.isNotEmpty &&
+                              kembalian < 0)
+                          ? null
+                          : () {
+                              Navigator.of(ctx).pop();
+                              t.addtransaksi(
+                                data: b.beli,
+                                bayar: totalBayar,
+                                metode: selectedMetode,
+                              );
+                              b.hapusbeliall();
+                              NotificationHelper.showTransactionSuccess(
+                                total: totalBayar,
+                                metode: selectedMetode,
+                              );
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.teal,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: const Text(
+                        'Konfirmasi Pembayaran',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _paymentChip(
+      String label, IconData icon, bool isSelected, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.navy.withOpacity(0.1)
+              : AppColors.bgLight,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.navy : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon,
+                size: 18,
+                color: isSelected ? AppColors.navy : AppColors.textSecondary),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? AppColors.navy : AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         elevation: 0,
-        shadowColor: Colors.black,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Colors.transparent,
         title: Row(
           children: [
-            Image.asset(
-              'assets/f6c05c2d-be07-488c-95a9-f77fa90a54c8.jpg',
-              width: 32,
-              height: 32,
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  'assets/logo.png',
+                  fit: BoxFit.cover,
+                  errorBuilder: (ctx, err, st) => Container(
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child:
+                        const Icon(Icons.store, color: Colors.white, size: 20),
+                  ),
+                ),
+              ),
             ),
-            SizedBox(width: 10),
-            Text(
-              "Kasir Kilat",
+            const SizedBox(width: 10),
+            const Text(
+              'Transaksi',
               style: TextStyle(
-                color: Colors.black,
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
           ],
         ),
         actions: [
-          InkWell(
-            onTap: () {
-              Get.to(
-                History(),
-              );
-            },
-            child: Icon(Icons.history, color: Colors.black),
-          ),
-          SizedBox(
-            width: 15,
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: AppColors.navy.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: IconButton(
+              onPressed: () {
+                Get.to(() => History(),
+                    transition: Transition.rightToLeftWithFade);
+              },
+              icon: const Icon(Icons.history_rounded, color: AppColors.navy),
+              tooltip: 'Riwayat',
+            ),
           ),
         ],
       ),
@@ -59,20 +359,48 @@ class _TransaksiState extends State<Transaksi> {
         init: Getbarang(),
         builder: (val) {
           final a = val.beli;
-          return SingleChildScrollView(
-            physics: BouncingScrollPhysics(),
-            child: val.beli.length < 0 || val.beli.isEmpty
-                  ? SizedBox(
-                      height: Get.height / 1.5,
-                      child: Center(
-                        child: Image.asset(
-                          'assets/Gemini_Generated_Image_eu48jheu48jheu48.png',
-                          width: Get.width / 2,
-                          fit: BoxFit.contain,
+          return a.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: AppColors.navy.withOpacity(0.05),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.shopping_cart_outlined,
+                          size: 48,
+                          color: AppColors.navy.withOpacity(0.3),
                         ),
                       ),
-                    )
-                : Column(
+                      const SizedBox(height: 16),
+                      Text(
+                        'Belum ada barang',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textSecondary.withOpacity(0.7),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tekan + untuk menambah barang',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 100),
+                  child: Column(
                     children: [
                       for (var i = 0; i < val.beli.length; i++)
                         ListSearch(
@@ -83,11 +411,12 @@ class _TransaksiState extends State<Transaksi> {
                           stock: (a[i]['jumlah'] as num?)?.toInt() ?? 0,
                           x: true,
                           i: i,
-                          jumbel: (a[i]['jumlahbeli'] as num?)?.toInt() ?? 0,
+                          jumbel:
+                              (a[i]['jumlahbeli'] as num?)?.toInt() ?? 0,
                         ),
                     ],
                   ),
-          );
+                );
         },
       ),
       floatingActionButton: Row(
@@ -96,60 +425,59 @@ class _TransaksiState extends State<Transaksi> {
           GetBuilder<Getbarang>(
             init: Getbarang(),
             builder: (val) {
-              int b = 0;
+              int totalBayar = 0;
               val.beli.forEach((item) {
-                b += (item['totharga'] as num).toInt();
+                totalBayar += (item['totharga'] as num).toInt();
               });
-              return val.beli.isNotEmpty || val.beli.length > 0
+              return val.beli.isNotEmpty
                   ? InkWell(
                       onTap: () {
-                        if (val.beli.length <= 0 || b == 0) {
-                          print("Kosong");
-                        } else {
-                          t.addtransaksi(data: val.beli, bayar: b);
-                          val.hapusbeliall();
-                        }
+                        if (totalBayar == 0) return;
+                        _showPaymentDialog(totalBayar);
                       },
                       child: Container(
-                        margin: EdgeInsets.only(left: 30),
+                        margin: const EdgeInsets.only(left: 30),
                         decoration: BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.circular(100),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.black38,
-                                  blurRadius: 5,
-                                  offset: Offset(0, 5))
-                            ]),
-                        height: 40,
-                        padding: EdgeInsets.only(left: 15, right: 15),
-                        child: Center(
-                          child: Text(
-                            uang.format(b),
-                            style: TextStyle(
-                              color: Colors.white,
-                              // fontWeight: FontWeight.bold,
+                          gradient: AppColors.primaryGradient,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.navy.withOpacity(0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
                             ),
-                          ),
+                          ],
+                        ),
+                        height: 48,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.payment_rounded,
+                                color: Colors.white, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              uang.format(totalBayar),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     )
-                  : SizedBox(
-                      width: 40,
-                    );
+                  : const SizedBox(width: 40);
             },
           ),
           FloatingActionButton(
-            backgroundColor: Colors.black,
+            backgroundColor: AppColors.teal,
             onPressed: () {
-              Get.to(
-                Search(),
-              );
+              Get.to(() => Search(),
+                  transition: Transition.rightToLeftWithFade);
             },
-            child: Icon(
-              Icons.add,
-              color: Colors.white,
-            ),
+            child: const Icon(Icons.add, color: Colors.white),
           ),
         ],
       ),

@@ -7,7 +7,7 @@ class TransaksiController extends GetxController {
   CollectionReference dbtransaksi =
       FirebaseFirestore.instance.collection('transaksi');
 
-  addtransaksi({required var data, required int bayar}) async {
+  addtransaksi({required var data, required int bayar, String metode = 'Cash'}) async {
     // Ensure each item has 'modal' using local cache (no Firestore reads) to avoid permission errors
     List itemsWithModal = [];
     Getbarang? gb;
@@ -51,6 +51,7 @@ class TransaksiController extends GetxController {
     await dbtransaksi.add({
       'data': itemsWithModal,
       'bayar': bayar,
+      'metode': metode,
       'tgl': DateTime.now(),
     });
     // After saving transaction, decrement stock for sold items
@@ -81,7 +82,7 @@ class TransaksiController extends GetxController {
           await FirebaseFirestore.instance.runTransaction((tran) async {
             final snap = await tran.get(docRef);
             if (!snap.exists) return;
-            final data = snap.data() as Map<String, dynamic>?;
+            final data = snap.data();
             int current = 0;
             if (data != null && data.containsKey('jumlah')) {
               try {
@@ -126,15 +127,77 @@ class TransaksiController extends GetxController {
                 'data': res.data(),
               },
             );
-            update();
-            // print(barang);
-            // update();
           },
         );
         update();
       },
     );
+  }
 
-    update();
+  /// Get transactions filtered by date range
+  List getTransaksiByDateRange(DateTime start, DateTime end) {
+    return transaksi.where((wrap) {
+      try {
+        var trx = wrap['data'] as Map<String, dynamic>;
+        DateTime tgl = (trx['tgl'] as dynamic).toDate();
+        return tgl.isAfter(start.subtract(const Duration(seconds: 1))) &&
+            tgl.isBefore(end.add(const Duration(days: 1)));
+      } catch (e) {
+        return false;
+      }
+    }).toList();
+  }
+
+  /// Get today's transactions
+  List getTodayTransactions() {
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    return getTransaksiByDateRange(startOfDay, endOfDay);
+  }
+
+  /// Get this month's transactions
+  List getMonthTransactions() {
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+    return getTransaksiByDateRange(startOfMonth, endOfMonth);
+  }
+
+  /// Get this week's transactions
+  List getWeekTransactions() {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final start = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+    final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    return getTransaksiByDateRange(start, end);
+  }
+
+  /// Calculate total revenue from a list of transactions
+  int calculateTotal(List trxList) {
+    int total = 0;
+    for (var wrap in trxList) {
+      var trx = wrap['data'] as Map<String, dynamic>;
+      total += (trx['bayar'] as num).toInt();
+    }
+    return total;
+  }
+
+  /// Get daily totals for last 7 days (for chart)
+  List<Map<String, dynamic>> getLast7DaysTotals() {
+    List<Map<String, dynamic>> result = [];
+    final now = DateTime.now();
+    for (int i = 6; i >= 0; i--) {
+      final day = now.subtract(Duration(days: i));
+      final start = DateTime(day.year, day.month, day.day);
+      final end = DateTime(day.year, day.month, day.day, 23, 59, 59);
+      final dayTrx = getTransaksiByDateRange(start, end);
+      result.add({
+        'date': day,
+        'total': calculateTotal(dayTrx),
+        'count': dayTrx.length,
+      });
+    }
+    return result;
   }
 }

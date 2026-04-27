@@ -1,6 +1,7 @@
 import 'package:cashier/barang/widget/list/contentlist.dart';
 import 'package:cashier/barang/widget/list/filte.dart';
 import 'package:cashier/controller/barangcontroller.dart';
+import 'package:cashier/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,69 +11,87 @@ class ListBarang extends StatefulWidget {
 }
 
 class _ListBarangState extends State<ListBarang> {
-  Widget listb() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 15, right: 15),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            "List barang",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Row(
-            children: [
-              Text(
-                "terbaru",
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 13,
-                ),
-              ),
-              SizedBox(
-                width: 15,
-              ),
-              InkWell(
-                onTap: () {
-                  Get.bottomSheet(Filte());
-                },
-                child: Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Icon(
-                    Icons.filter_alt_outlined,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 0, right: 0, bottom: 0),
+      padding: const EdgeInsets.only(bottom: 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          listb(),
-          SizedBox(
-            height: 5,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Daftar Produk',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    Get.bottomSheet(Filte());
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.navy.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.filter_alt_outlined,
+                            color: AppColors.navy, size: 16),
+                        SizedBox(width: 4),
+                        Text(
+                          'Filter',
+                          style: TextStyle(
+                            color: AppColors.navy,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
+          const SizedBox(height: 8),
           GetBuilder<Getbarang>(
             init: Getbarang(),
             builder: (val) {
+              if (val.barang.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: 48,
+                          color: AppColors.textSecondary.withOpacity(0.3),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Belum ada produk',
+                          style: TextStyle(
+                            color: AppColors.textSecondary.withOpacity(0.5),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
               return Column(
                 children: [
                   for (var a in val.barang)
@@ -83,52 +102,24 @@ class _ListBarangState extends State<ListBarang> {
                       id: (a['id'] ?? '').toString(),
                       nama: (a['data'] != null && a['data']['nama'] != null)
                           ? (a['data']['nama'] ?? '').toString()
-                          : ''.toString(),
+                          : '',
                       harga: (a['data'] != null && a['data']['harga'] != null)
                           ? (a['data']['harga'] as num).toInt()
                           : 0,
                       stock: (a['data'] != null && a['data']['jumlah'] != null)
                           ? (a['data']['jumlah'] as num).toInt()
                           : 0,
-                      modal: a['data'] != null && a['data'].containsKey('modal')
-                          ? (a['data']['modal'] as int)
-                          : 0,
+                      modal:
+                          a['data'] != null && a['data'].containsKey('modal')
+                              ? (a['data']['modal'] as num).toInt()
+                              : 0,
                     ),
                 ],
               );
             },
-          )
-          // Expa(
-          //   id: "24u90",
-          //   nama: "gulaku 1kg",
-          //   harga: 120000,
-          //   stock: 20,
-          // ),
-          // Expa(
-          //   id: "yuriy",
-          //   nama: "gulaku 1kg",
-          //   harga: 120000,
-          //   stock: 5,
-          // )
+          ),
         ],
       ),
     );
   }
 }
-
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///

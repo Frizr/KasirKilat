@@ -1,9 +1,9 @@
 import 'package:cashier/controller/barangcontroller.dart';
 import 'package:cashier/manage/formater.dart';
+import 'package:cashier/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
-import 'package:responsive_grid/responsive_grid.dart';
 
 class Expa extends StatefulWidget {
   final String id;
@@ -30,402 +30,285 @@ class _ExpaState extends State<Expa> {
   TextEditingController modal = TextEditingController();
   bool ex = false;
   Getbarang b = Get.put(Getbarang());
+
   @override
   void initState() {
     super.initState();
   }
 
+  Color _statusColor() {
+    if (widget.stock <= 0) return AppColors.danger;
+    if (widget.stock <= 10) return AppColors.warning;
+    return AppColors.success;
+  }
+
+  String _statusText() {
+    if (widget.stock <= 0) return 'Habis';
+    if (widget.stock <= 10) return 'Hampir Habis';
+    return 'Tersedia';
+  }
+
+  Widget _editField({
+    required String label,
+    required TextEditingController c,
+    TextInputType tp = TextInputType.text,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 11,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          height: 42,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: AppColors.bgLight,
+            border: Border.all(color: AppColors.navy.withOpacity(0.08)),
+          ),
+          child: TextField(
+            keyboardType: tp,
+            onChanged: (value) {
+              setState(() {});
+            },
+            cursorColor: AppColors.navy,
+            style: const TextStyle(fontSize: 13),
+            controller: c,
+            decoration: InputDecoration(
+              hintText: label,
+              hintStyle: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+              ),
+              border: InputBorder.none,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    String statusText = "";
-    Color statusColor = Colors.green;
-    if (widget.stock <= 0) {
-      statusText = "Stok Kosong";
-      statusColor = Colors.red;
-    } else if (widget.stock <= 10) {
-      statusText = "Stok Hampir Habis";
-      statusColor = Colors.orange;
-    } else {
-      statusText = "Stok Tersedia";
-      statusColor = Colors.green;
-    }
-    return Slidable(
-      key: ValueKey(widget.id),
-      startActionPane: ActionPane(
-        motion: const DrawerMotion(),
-        children: [
-          SlidableAction(
-            label: 'Hapus',
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.black,
-            icon: Icons.delete_outline_rounded,
-            onPressed: (context) {
-              b.deletbarang(id: widget.id, nama: widget.nama);
-            },
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.navy.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      endActionPane: ActionPane(
-        motion: const DrawerMotion(),
-        children: [
-          SlidableAction(
-            label: 'Hapus',
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.black,
-            icon: Icons.delete_outline_rounded,
-            onPressed: (context) {
-              b.deletbarang(id: widget.id, nama: widget.nama);
-            },
-          ),
-        ],
-      ),
-      child: Theme(
-        data: ThemeData(fontFamily: 'm').copyWith(
-          dividerColor: Colors.transparent,
-          focusColor: Colors.black,
-          primaryColor: Colors.black,
-          colorScheme:
-              ColorScheme.fromSwatch().copyWith(secondary: Colors.black),
-        ),
-        child: ExpansionTile(
-          tilePadding: EdgeInsets.fromLTRB(15, 15, 15, 15),
-          backgroundColor: Colors.white,
-          leading: Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(100),
-              child: Icon(Icons.folder_open, color: Colors.black),
-            ),
-          ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.nama,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: ex ? Colors.black : Colors.black,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    uang.format(widget.harga),
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: ex
-                          ? Colors.black.withOpacity(0.6)
-                          : Colors.black.withOpacity(0.6),
-                    ),
-                  )
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: EdgeInsets.fromLTRB(8, 6, 8, 6),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: statusColor,
-                    ),
-                    child: Text(
-                      widget.stock.toString(),
-                      style: TextStyle(fontSize: 13, color: Colors.white),
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    statusText,
-                    style: TextStyle(fontSize: 11, color: statusColor),
-                  ),
-                ],
-              )
-            ],
-          ),
-          trailing: RotatedBox(
-            quarterTurns: !ex ? 0 : 45,
-            child: Icon(Icons.chevron_right_rounded),
-          ),
+      child: Slidable(
+        key: ValueKey(widget.id),
+        startActionPane: ActionPane(
+          motion: const DrawerMotion(),
           children: [
-            // Container(
-            //   margin: EdgeInsets.all(10),
-            //   width: 140,
-            //   height: 140,
-            //   decoration: BoxDecoration(
-            //       color: Colors.white,
-            //       shape: BoxShape.circle,
-            //       boxShadow: [
-            //         BoxShadow(
-            //           color: Colors.black26,
-            //           blurRadius: 5,
-            //         ),
-            //       ]),
-            //   child: ClipRRect(
-            //     borderRadius: BorderRadius.circular(100),
-            //     child: Image.asset(
-            //       "assets/gula.jpg",
-            //       fit: BoxFit.cover,
-            //     ),
-            //   ),
-            // ),
-            // kode removed from item edit (not required)
-            SizedBox(
-              height: 15,
+            SlidableAction(
+              label: 'Hapus',
+              backgroundColor: AppColors.danger,
+              foregroundColor: Colors.white,
+              icon: Icons.delete_outline_rounded,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(14),
+                bottomLeft: Radius.circular(14),
+              ),
+              onPressed: (context) {
+                b.deletbarang(id: widget.id, nama: widget.nama);
+              },
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ],
+        ),
+        endActionPane: ActionPane(
+          motion: const DrawerMotion(),
+          children: [
+            SlidableAction(
+              label: 'Hapus',
+              backgroundColor: AppColors.danger,
+              foregroundColor: Colors.white,
+              icon: Icons.delete_outline_rounded,
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(14),
+                bottomRight: Radius.circular(14),
+              ),
+              onPressed: (context) {
+                b.deletbarang(id: widget.id, nama: widget.nama);
+              },
+            ),
+          ],
+        ),
+        child: Theme(
+          data: ThemeData(fontFamily: 'm').copyWith(
+            dividerColor: Colors.transparent,
+          ),
+          child: ExpansionTile(
+            tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            backgroundColor: Colors.transparent,
+            collapsedBackgroundColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            collapsedShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            leading: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.navy.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.inventory_2_outlined,
+                  color: AppColors.navy, size: 22),
+            ),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 15, right: 15),
-                  child: Text(
-                    "Nama",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey,
-                    ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.nama,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: AppColors.textPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        uang.format(widget.harga),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Container(
-                  height: 40,
-                  margin: EdgeInsets.only(left: 15, right: 15),
-                  padding: EdgeInsets.only(left: 15, right: 15, bottom: 1),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.grey.shade200,
-                  ),
-                  child: TextField(
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                    cursorColor: Colors.black,
-                    style: TextStyle(
-                      fontSize: 13,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: _statusColor().withOpacity(0.1),
+                      ),
+                      child: Text(
+                        widget.stock.toString(),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: _statusColor(),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                    controller: nama,
-                    decoration: InputDecoration(
-                      hintText: "Nama",
-                      border: InputBorder.none,
+                    const SizedBox(height: 3),
+                    Text(
+                      _statusText(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: _statusColor(),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
-            SizedBox(
-              height: 15,
+            trailing: AnimatedRotation(
+              turns: ex ? 0.25 : 0,
+              duration: const Duration(milliseconds: 200),
+              child: const Icon(Icons.chevron_right_rounded,
+                  color: AppColors.textSecondary),
             ),
-            ResponsiveGridRow(children: [
-              ResponsiveGridCol(
-                xs: 6,
-                md: 3,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 15, right: 15),
-                      child: Text(
-                        "Harga",
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey,
-                        ),
-                      ),
+                    _editField(label: 'Nama', c: nama),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                            child: _editField(
+                                label: 'Harga',
+                                c: harga,
+                                tp: TextInputType.number)),
+                        const SizedBox(width: 10),
+                        Expanded(
+                            child: _editField(
+                                label: 'Modal',
+                                c: modal,
+                                tp: TextInputType.number)),
+                        const SizedBox(width: 10),
+                        Expanded(
+                            child: _editField(
+                                label: 'Stok',
+                                c: stock,
+                                tp: TextInputType.number)),
+                      ],
                     ),
-                    Container(
-                      height: 40,
-                      margin: EdgeInsets.only(left: 15, right: 7.5),
-                      padding: EdgeInsets.only(left: 15, right: 15, bottom: 1),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.grey.shade200,
-                      ),
-                      child: TextField(
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          setState(() {});
-                        },
-                        cursorColor: Colors.black,
-                        style: TextStyle(
-                          fontSize: 13,
-                        ),
-                        controller: harga,
-                        decoration: InputDecoration(
-                          hintText: "Harga",
-                          border: InputBorder.none,
+                    const SizedBox(height: 14),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox(
+                        height: 40,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            b.editbarang(
+                              id: widget.id,
+                              nama: nama.text,
+                              harga: int.tryParse(harga.text) ?? 0,
+                              stock: int.tryParse(stock.text) ?? 0,
+                              modal: int.tryParse(modal.text) ?? 0,
+                            );
+                          },
+                          icon: const Icon(Icons.save_rounded, size: 18),
+                          label: const Text('Simpan',
+                              style: TextStyle(fontSize: 13)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.teal,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              ResponsiveGridCol(
-                xs: 6,
-                md: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 15, right: 15),
-                      child: Text(
-                        "Modal",
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 40,
-                      margin: EdgeInsets.only(left: 7.5, right: 7.5),
-                      padding: EdgeInsets.only(left: 15, right: 15, bottom: 1),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.grey.shade200,
-                      ),
-                      child: TextField(
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          setState(() {});
-                        },
-                        cursorColor: Colors.black,
-                        style: TextStyle(
-                          fontSize: 13,
-                        ),
-                        controller: modal,
-                        decoration: InputDecoration(
-                          hintText: "Modal",
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              ResponsiveGridCol(
-                xs: 6,
-                md: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 15, right: 15),
-                      child: Text(
-                        "Jumlah",
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 40,
-                      margin: EdgeInsets.only(left: 7.5, right: 15),
-                      padding: EdgeInsets.only(left: 15, right: 15, bottom: 1),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.grey.shade200,
-                      ),
-                      child: TextField(
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          setState(() {});
-                        },
-                        cursorColor: Colors.black,
-                        style: TextStyle(
-                          fontSize: 13,
-                        ),
-                        controller: stock,
-                        decoration: InputDecoration(
-                          hintText: "Jumlah",
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ]),
-            SizedBox(
-              height: 15,
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: InkWell(
-                onTap: () {
-                  b.editbarang(
-                    id: widget.id,
-                    nama: nama.text,
-                    harga: int.tryParse(harga.text) ?? 0,
-                    stock: int.tryParse(stock.text) ?? 0,
-                    modal: int.tryParse(modal.text) ?? 0,
-                  );
-                },
-                child: Container(
-                  margin: EdgeInsets.only(left: 15, right: 15),
-                  height: 40,
-                  width: Get.width / 3,
-                  decoration: BoxDecoration(
-                    color: nama.text.length <= 0 ||
-                            harga.text.length <= 0 ||
-                            stock.text.length <= 0 ||
-                            nama.text == widget.nama &&
-                                harga.text == widget.harga.toString() &&
-                                stock.text == widget.stock.toString()
-                        ? Colors.grey.shade200
-                        : Colors.black,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                      child: Text(
-                    "Simpan",
-                    style: TextStyle(
-                      color: nama.text.length <= 0 ||
-                              harga.text.length <= 0 ||
-                              stock.text.length <= 0
-                          ? Colors.grey
-                          : Colors.white,
-                      fontSize: 13,
-                    ),
-                  )),
-                ),
-              ),
-            )
-          ],
-          onExpansionChanged: (value) {
-            setState(() {
-                if (value == false) {
-                nama.text.length <= 0
-                  ? nama.text = widget.nama
-                  : nama.text = nama.text;
-                harga.text.length <= 0
-                    ? harga.text = widget.harga.toString()
-                    : harga.text = harga.text;
-                stock.text.length <= 0
-                    ? stock.text = widget.stock.toString()
-                    : stock.text = stock.text;
-                modal.text.length <= 0
-                    ? modal.text = widget.modal.toString()
-                    : modal.text = modal.text;
-              }
-              if (value == true) {
-                nama.text = widget.nama;
-                harga.text = widget.harga.toString();
-                stock.text = widget.stock.toString();
-                modal.text = widget.modal.toString();
-              }
-              ex = value;
-            });
-          },
+            ],
+            onExpansionChanged: (value) {
+              setState(() {
+                if (value) {
+                  nama.text = widget.nama;
+                  harga.text = widget.harga.toString();
+                  stock.text = widget.stock.toString();
+                  modal.text = widget.modal.toString();
+                }
+                ex = value;
+              });
+            },
+          ),
         ),
       ),
     );

@@ -1,7 +1,10 @@
 import 'package:cashier/barang/barang.dart';
 import 'package:cashier/controller/barangcontroller.dart';
 import 'package:cashier/controller/transaksicontroller.dart';
+import 'package:cashier/dashboard/dashboard.dart';
 import 'package:cashier/laporan/laporan.dart';
+import 'package:cashier/theme/app_colors.dart';
+import 'package:cashier/theme/app_theme.dart';
 import 'package:cashier/transaksi/transaksi.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -25,36 +28,34 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
     SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        systemNavigationBarColor: Colors.transparent,
-        statusBarColor: Colors.transparent, // status bar color
-        statusBarIconBrightness: Brightness.dark, // status bar icons' color
+      const SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.white,
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
     );
     return GetMaterialApp(
       title: 'Kasir Kilat',
-      theme: ThemeData(
-        fontFamily: "m",
-        primaryColor: Colors.black, colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.black),
-      ),
+      theme: AppTheme.theme,
       debugShowCheckedModeBanner: false,
-      color: Colors.grey.shade100,
-      home: Wrap(),
+      home: MainWrapper(),
     );
   }
 }
 
-class Wrap extends StatefulWidget {
+class MainWrapper extends StatefulWidget {
   @override
-  _WrapState createState() => _WrapState();
+  _MainWrapperState createState() => _MainWrapperState();
 }
 
-class _WrapState extends State<Wrap> {
-  int hlm = 0;
-  PageController p = PageController(initialPage: 0, keepPage: true);
-  Getbarang b = Get.put(Getbarang());
-  TransaksiController t = Get.put(TransaksiController());
+class _MainWrapperState extends State<MainWrapper> {
+  int _currentIndex = 0;
+  final PageController _pageController =
+      PageController(initialPage: 0, keepPage: true);
+  final Getbarang b = Get.put(Getbarang());
+  final TransaksiController t = Get.put(TransaksiController());
+
   @override
   void initState() {
     b.getbarang();
@@ -62,54 +63,107 @@ class _WrapState extends State<Wrap> {
     super.initState();
   }
 
+  void _goToPage(int index) {
+    setState(() {
+      _currentIndex = index;
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bgLight,
       body: PageView(
-        physics: BouncingScrollPhysics(),
-        controller: p,
+        physics: const BouncingScrollPhysics(),
+        controller: _pageController,
         children: [
+          Dashboard(goToPage: _goToPage),
           Transaksi(),
           Barang(),
           Laporan(),
         ],
         onPageChanged: (value) {
           setState(() {
-            hlm = value;
+            _currentIndex = value;
           });
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: (value) {
-          setState(() {
-            hlm = value;
-            p.animateToPage(value,
-                duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
-          });
-        },
-        currentIndex: hlm,
-        elevation: 0,
-        items: [
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.swap_horiz_rounded,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.navy.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(0, Icons.dashboard_rounded,
+                    Icons.dashboard_outlined, 'Dashboard'),
+                _buildNavItem(1, Icons.swap_horiz_rounded,
+                    Icons.swap_horiz_rounded, 'Transaksi'),
+                _buildNavItem(2, Icons.inventory_2_rounded,
+                    Icons.inventory_2_outlined, 'Produk'),
+                _buildNavItem(
+                    3, Icons.bar_chart_rounded, Icons.bar_chart_rounded, 'Laporan'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(
+      int index, IconData activeIcon, IconData inactiveIcon, String label) {
+    final isActive = _currentIndex == index;
+    return InkWell(
+      onTap: () => _goToPage(index),
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        padding: EdgeInsets.symmetric(
+          horizontal: isActive ? 16 : 12,
+          vertical: 8,
+        ),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.navy.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isActive ? activeIcon : inactiveIcon,
+              color: isActive ? AppColors.navy : AppColors.textSecondary,
+              size: 22,
+            ),
+            if (isActive) ...[
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: AppColors.navy,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              label: "Transaksi"),
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.store_mall_directory_outlined,
-              ),
-              label: "Barang"),
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.paste_rounded,
-              ),
-              label: "Laporan"),
-        ],
-        backgroundColor: Colors.white,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.black26,
+            ],
+          ],
+        ),
       ),
     );
   }

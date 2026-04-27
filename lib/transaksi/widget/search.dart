@@ -1,8 +1,8 @@
 import 'package:cashier/controller/barangcontroller.dart';
 import 'package:cashier/transaksi/widget/listsearch.dart';
+import 'package:cashier/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-// scan removed: searches no longer use camera
 
 class Search extends StatefulWidget {
   @override
@@ -12,33 +12,6 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
   Getbarang b = Get.put(Getbarang());
   TextEditingController barang = TextEditingController();
-
-  Widget sc() {
-    return Container(
-      height: 40,
-      padding: EdgeInsets.only(left: 15, right: 0, bottom: 1),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.grey.shade200,
-      ),
-      child: TextField(
-        onChanged: (value) {
-          setState(() {
-            b.cari(cari: value);
-          });
-        },
-        cursorColor: Colors.black,
-        style: TextStyle(
-          fontSize: 13,
-        ),
-        controller: barang,
-        decoration: InputDecoration(
-          hintText: "Cari barang",
-          border: InputBorder.none,
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,25 +25,79 @@ class _SearchState extends State<Search> {
       },
       child: GestureDetector(
         onTap: () {
-          FocusScope.of(context).requestFocus(new FocusNode());
+          FocusScope.of(context).requestFocus(FocusNode());
         },
         child: Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bgLight,
           appBar: AppBar(
             elevation: 0,
-            shadowColor: Colors.transparent,
-            automaticallyImplyLeading: false,
             backgroundColor: Colors.transparent,
-            title: sc(),
+            automaticallyImplyLeading: true,
+            iconTheme: const IconThemeData(color: AppColors.navy),
+            title: Container(
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.navy.withOpacity(0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    b.cari(cari: value);
+                  });
+                },
+                cursorColor: AppColors.navy,
+                style: const TextStyle(fontSize: 14),
+                controller: barang,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Cari barang...',
+                  hintStyle: TextStyle(color: AppColors.textSecondary),
+                  border: InputBorder.none,
+                  icon: Icon(Icons.search, color: AppColors.textSecondary, size: 20),
+                ),
+              ),
+            ),
           ),
           body: SizedBox.expand(
             child: SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 children: [
+                  const SizedBox(height: 8),
                   GetBuilder<Getbarang>(
                     init: Getbarang(),
                     builder: (val) {
+                      if (val.temu.isEmpty && barang.text.isNotEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 60),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.search_off_rounded,
+                                size: 48,
+                                color: AppColors.textSecondary.withOpacity(0.3),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Barang tidak ditemukan',
+                                style: TextStyle(
+                                  color: AppColors.textSecondary.withOpacity(0.5),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
                       return Column(
                         children: [
                           for (var a in val.temu)
@@ -83,7 +110,7 @@ class _SearchState extends State<Search> {
                               nama: (a['data'] != null &&
                                       (a['data']['nama'] ?? '') != null)
                                   ? (a['data']['nama'] ?? '').toString()
-                                  : ''.toString(),
+                                  : '',
                               harga: (a['data'] != null &&
                                       a['data']['harga'] != null)
                                   ? (a['data']['harga'] as num).toInt()
@@ -98,7 +125,7 @@ class _SearchState extends State<Search> {
                         ],
                       );
                     },
-                  )
+                  ),
                 ],
               ),
             ),
