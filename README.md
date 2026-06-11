@@ -17,6 +17,18 @@ menjalankan, dan mengetes project dengan benar.
 - Laporan penjualan harian, mingguan, bulanan, dan ekspor CSV.
 - Scanner barcode memakai `mobile_scanner`.
 
+## Tampilan Aplikasi
+
+Berikut adalah screenshot dari aplikasi Kasir Kilat:
+
+<p align="center">
+  <img src="assets/dashboard.png" width="200" alt="Dashboard">
+  <img src="assets/transaksi.png" width="200" alt="Transaksi">
+  <img src="assets/produk.png" width="200" alt="Produk">
+  <img src="assets/laporan.png" width="200" alt="Laporan">
+  <img src="assets/tambah_produk.png" width="200" alt="Tambah Produk">
+</p>
+
 ## Kebutuhan Awal
 
 Pastikan komputer sudah memiliki:
