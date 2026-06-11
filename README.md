@@ -1,92 +1,119 @@
-<<<<<<< HEAD
 # Kasir Kilat
 
-Kasir Kilat adalah aplikasi Point of Sales (POS) / Kasir digital modern yang dirancang khusus untuk UMKM (Usaha Mikro, Kecil, dan Menengah). Aplikasi ini dibangun dengan menggunakan arsitektur yang bersih, antarmuka yang elegan (tema Dark Navy & Teal), dan dukungan database real-time.
+Kasir Kilat adalah aplikasi POS/kasir Flutter untuk demo akademik UMKM.
+Aplikasi memakai Firebase Cloud Firestore sebagai database real-time dan GetX
+untuk state management.
 
-## 📸 Screenshot Aplikasi
-> **Catatan untuk Screenshot:** 
-> *(Silakan kirimkan screenshot aplikasi (Dashboard, Transaksi, Produk, Laporan) di chat, atau letakkan gambar tersebut di folder `assets/` dengan nama `dashboard.png`, `transaksi.png`, dll., lalu kita bisa mengupdate bagian ini.)*
+## Fitur Utama
 
-<div align="center">
-  <img src="assets/dashboard.png" width="200" alt="Dashboard" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="assets/transaksi.png" width="200" alt="Transaksi" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="assets/produk.png" width="200" alt="Produk" />
-</div>
+- Login user berdasarkan collection Firestore `users`.
+- Role `admin` dan `karyawan`.
+- Dashboard ringkasan penjualan dan stok.
+- Transaksi kasir dengan update stok produk.
+- Manajemen produk/barang.
+- Laporan transaksi harian, mingguan, bulanan, dan ekspor CSV.
+- Scanner barcode menggunakan `mobile_scanner`.
 
-## ✨ Fitur Utama
+## Akun Demo
 
-Aplikasi ini memiliki 4 pilar fitur utama yang dapat diakses melalui navigasi bawah:
+Pastikan dokumen di collection `users` memiliki field:
 
-1. **📊 Dashboard**
-   - Ringkasan performa bisnis.
-   - Akses cepat ke metrik penting toko.
-2. **💱 Transaksi**
-   - Pencatatan transaksi penjualan secara real-time.
-   - Manajemen keranjang belanja yang cepat dan responsif.
-3. **📦 Manajemen Produk (Barang)**
-   - Tambah, Edit, dan Hapus (CRUD) produk.
-   - Sinkronisasi otomatis dengan database cloud.
-4. **📈 Laporan**
-   - Visualisasi data penjualan (Bar Charts).
-   - Pembuatan (generate) dokumen PDF untuk laporan penjualan.
+```text
+nama: String
+username: String
+password: String
+role: String        // admin atau karyawan
+aktif: Boolean
+createdAt: Timestamp
+```
 
-**Fitur Tambahan:**
-- **Real-time Synchronization:** Menggunakan Firebase Cloud Firestore untuk sinkronisasi data antar perangkat.
-- **Local Notifications:** Notifikasi lokal untuk pengingat atau aksi tertentu.
-- **Camera Integration:** Pengambilan gambar langsung dari dalam aplikasi.
-- **Pull-to-Refresh:** Pembaruan data manual dengan gestur tarik layar ke bawah/atas.
+Contoh akun demo:
 
-## 🛠️ Teknologi & Arsitektur
+| Role | Username | Password |
+| --- | --- | --- |
+| Admin | `admin01` | `admin123` |
+| Karyawan | `kasir01` | `kasir123` |
 
-- **Framework:** [Flutter](https://flutter.dev/) (SDK >=3.4.0 <4.0.0)
-- **State Management:** [GetX](https://pub.dev/packages/get)
-- **Database & Storage:** [Firebase Cloud Firestore](https://firebase.google.com/docs/firestore) & [Firebase Storage](https://firebase.google.com/docs/storage)
-- **UI & Styling:** Custom Theme (AppColors & AppTheme) dengan sentuhan warna *Navy* dan *Teal*. Lottie untuk animasi.
-- **Lainnya:**
-  - `intl` untuk format tanggal dan mata uang.
-  - `responsive_grid` untuk layout grid dinamis.
-  - `flutter_slidable` untuk interaksi geser pada list.
+Admin dapat membuka menu Kelola. Karyawan tidak dapat membuka menu Kelola.
 
-## 🚀 Memulai (Getting Started)
+## Setup
 
-### Prasyarat
-- Flutter SDK (Versi terbaru disarankan, >=3.4.0)
-- Android Studio / VS Code
-- Akses ke Firebase Project (file `google-services.json` untuk Android atau `GoogleService-Info.plist` untuk iOS sudah harus terkonfigurasi)
+1. Clone repository:
 
-### Instalasi & Menjalankan Aplikasi
-
-1. **Clone repositori ini** (jika menggunakan git):
    ```bash
-   git clone <url-repo-anda>
-   cd cashier-master\ tubes
+   git clone https://github.com/Frizr/KasirKilat.git
+   cd KasirKilat
    ```
 
-2. **Unduh seluruh dependensi:**
+2. Pasang dependency:
+
    ```bash
    flutter pub get
    ```
 
-3. **Jalankan aplikasi** di emulator atau perangkat fisik:
+3. Setup Firebase Android:
+
+   - Buat project Firebase.
+   - Tambahkan app Android dengan package name `com.tutu.cashier`.
+   - Unduh `google-services.json`.
+   - Letakkan file tersebut di `android/app/google-services.json`.
+   - Aktifkan Cloud Firestore.
+   - Buat collection `users`, `barang`, dan `transaksi`.
+
+4. Jalankan aplikasi:
+
    ```bash
    flutter run
    ```
 
-## 📁 Struktur Proyek (lib/)
+## Catatan Security
 
-- `barang/`: Layar dan komponen untuk manajemen produk.
-- `controller/`: Logika state management GetX (contoh: `barangcontroller.dart`, `transaksicontroller.dart`).
-- `dashboard/`: Antarmuka layar utama/dashboard.
-- `laporan/`: Antarmuka dan logika pembuatan laporan penjualan (termasuk PDF dan Grafik).
-- `manage/`: Manajemen aplikasi tambahan.
-- `notification/`: Service untuk notifikasi lokal.
-- `theme/`: Definisi warna, tipografi, dan tema aplikasi (`app_colors.dart`, `app_theme.dart`).
-- `transaksi/`: Layar untuk mengelola transaksi POS.
+Project ini masih membandingkan password plaintext di Firestore untuk kebutuhan
+demo akademik. Jangan gunakan pola ini untuk production. Untuk production,
+gunakan Firebase Authentication atau password hashing yang benar, rules
+Firestore yang ketat, dan jangan izinkan client membaca password.
 
----
-*Dibuat untuk memudahkan operasional UMKM menjadi lebih cepat dan kilat!*
-=======
-cashier aplication using flutter firebase
->>>>>>> 9646e53f1d48b67941cbdfaf6c3fec75f51e7574
+## Troubleshooting Android
+
+Jika muncul error Kotlin incremental cache atau error terkait `mobile_scanner`,
+coba bersihkan cache build tanpa menghapus fitur scanner:
+
+```bash
+flutter clean
+flutter pub get
+cd android
+./gradlew clean
+cd ..
+flutter build apk --debug
+```
+
+Di Windows PowerShell:
+
+```powershell
+flutter clean
+flutter pub get
+cd android
+.\gradlew.bat clean
+cd ..
+flutter build apk --debug
+```
+
+Jika error tetap muncul karena cache berada di root drive berbeda antara
+Pub Cache `C:\` dan project `D:\`, hapus cache build Gradle project
+(`build/` dan `android/.gradle/`) lalu jalankan ulang perintah di atas. Jika
+masih gagal, pertimbangkan update atau downgrade `mobile_scanner` setelah
+mengecek kompatibilitas Flutter, Kotlin, dan Android Gradle Plugin yang dipakai.
+
+Project ini juga menonaktifkan Kotlin incremental cache di
+`android/gradle.properties` sebagai mitigasi error lintas drive tersebut.
+
+## Struktur Project
+
+- `lib/auth/`: login dan kelola user.
+- `lib/controller/`: controller GetX untuk auth, user, barang, dan transaksi.
+- `lib/dashboard/`: dashboard.
+- `lib/barang/`: manajemen produk.
+- `lib/transaksi/`: alur transaksi dan riwayat.
+- `lib/laporan/`: laporan penjualan.
+- `lib/manage/`: utilitas seperti formatter dan scanner.
+- `lib/theme/`: warna dan theme aplikasi.

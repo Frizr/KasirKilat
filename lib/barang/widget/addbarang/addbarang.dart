@@ -15,7 +15,7 @@ class _AddBaranGState extends State<AddBaranG> {
   TextEditingController harga = TextEditingController();
   TextEditingController jumlah = TextEditingController();
   TextEditingController modal = TextEditingController();
-  Getbarang b = Get.put(Getbarang());
+  Getbarang b = Get.find<Getbarang>();
 
   Widget _inputField({
     required String label,
@@ -68,9 +68,7 @@ class _AddBaranGState extends State<AddBaranG> {
   }
 
   bool get _isValid =>
-      nama.text.isNotEmpty &&
-      harga.text.isNotEmpty &&
-      jumlah.text.isNotEmpty;
+      nama.text.isNotEmpty && harga.text.isNotEmpty && jumlah.text.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {

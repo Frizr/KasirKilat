@@ -16,7 +16,7 @@ class Transaksi extends StatefulWidget {
 
 class _TransaksiState extends State<Transaksi> {
   TransaksiController t = Get.put(TransaksiController());
-  Getbarang b = Get.put(Getbarang());
+  Getbarang b = Get.find<Getbarang>();
   final TextEditingController _searchController = TextEditingController();
 
   void _showPaymentDialog(int totalBayar) {
@@ -24,6 +24,7 @@ class _TransaksiState extends State<Transaksi> {
     TextEditingController cashController = TextEditingController();
     int kembalian = 0;
     bool showKembalian = false;
+    bool isProcessing = false;
 
     showModalBottomSheet(
       context: context,
@@ -108,14 +109,14 @@ class _TransaksiState extends State<Transaksi> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      _paymentChip('Cash', Icons.money_rounded,
-                          selectedMetode == 'Cash', () {
+                      _paymentChip(
+                          'Cash', Icons.money_rounded, selectedMetode == 'Cash',
+                          () {
                         setModalState(() {
                           selectedMetode = 'Cash';
                           showKembalian = false;
                         });
                       }),
-
                       _paymentChip('QRIS', Icons.qr_code_rounded,
                           selectedMetode == 'QRIS', () {
                         setModalState(() {
@@ -214,22 +215,36 @@ class _TransaksiState extends State<Transaksi> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: (selectedMetode == 'Cash' &&
-                              cashController.text.isNotEmpty &&
-                              kembalian < 0)
+                      onPressed: (isProcessing ||
+                              (selectedMetode == 'Cash' &&
+                                  cashController.text.isNotEmpty &&
+                                  kembalian < 0))
                           ? null
-                          : () {
-                              Navigator.of(ctx).pop();
-                              t.addtransaksi(
+                          : () async {
+                              setModalState(() {
+                                isProcessing = true;
+                              });
+
+                              final success = await t.addtransaksi(
                                 data: b.beli,
                                 bayar: totalBayar,
                                 metode: selectedMetode,
                               );
-                              b.hapusbeliall();
-                              NotificationHelper.showTransactionSuccess(
-                                total: totalBayar,
-                                metode: selectedMetode,
-                              );
+
+                              if (success) {
+                                if (Navigator.of(ctx).canPop()) {
+                                  Navigator.of(ctx).pop();
+                                }
+                                b.hapusbeliall();
+                                NotificationHelper.showTransactionSuccess(
+                                  total: totalBayar,
+                                  metode: selectedMetode,
+                                );
+                              } else if (mounted) {
+                                setModalState(() {
+                                  isProcessing = false;
+                                });
+                              }
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.teal,
@@ -239,13 +254,22 @@ class _TransaksiState extends State<Transaksi> {
                         ),
                         elevation: 2,
                       ),
-                      child: const Text(
-                        'Konfirmasi Pembayaran',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: isProcessing
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : const Text(
+                              'Konfirmasi Pembayaran',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -266,9 +290,8 @@ class _TransaksiState extends State<Transaksi> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.navy.withOpacity(0.1)
-              : AppColors.bgLight,
+          color:
+              isSelected ? AppColors.navy.withOpacity(0.1) : AppColors.bgLight,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? AppColors.navy : Colors.transparent,
@@ -399,11 +422,13 @@ class _TransaksiState extends State<Transaksi> {
                 children: [
                   for (var a in hasil)
                     ListSearch(
-                      kode: (a['data'] != null && (a['data']['bar'] ?? '') != null)
+                      kode: (a['data'] != null &&
+                              (a['data']['bar'] ?? '') != null)
                           ? (a['data']['bar'] ?? '').toString()
                           : (a['bar'] ?? '').toString(),
                       id: (a['id'] ?? '').toString(),
-                      nama: (a['data'] != null && (a['data']['nama'] ?? '') != null)
+                      nama: (a['data'] != null &&
+                              (a['data']['nama'] ?? '') != null)
                           ? (a['data']['nama'] ?? '').toString()
                           : (a['nama'] ?? '').toString(),
                       harga: (a['data'] != null && a['data']['harga'] != null)
@@ -424,7 +449,8 @@ class _TransaksiState extends State<Transaksi> {
             children: [
               // Search bar
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 color: Colors.transparent,
                 child: Container(
                   height: 48,
@@ -442,7 +468,8 @@ class _TransaksiState extends State<Transaksi> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.search, color: AppColors.textSecondary, size: 20),
+                      const Icon(Icons.search,
+                          color: AppColors.textSecondary, size: 20),
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
@@ -456,7 +483,8 @@ class _TransaksiState extends State<Transaksi> {
                           style: const TextStyle(fontSize: 14),
                           decoration: const InputDecoration(
                             hintText: 'Cari barang...',
-                            hintStyle: TextStyle(color: AppColors.textSecondary),
+                            hintStyle:
+                                TextStyle(color: AppColors.textSecondary),
                             border: InputBorder.none,
                           ),
                         ),
@@ -481,13 +509,18 @@ class _TransaksiState extends State<Transaksi> {
                               for (var i = 0; i < cart.length; i++)
                                 ListSearch(
                                   kode: (cart[i]['kode'] ?? '').toString(),
-                                  id: (cart[i]['idb'] ?? cart[i]['id'] ?? '').toString(),
+                                  id: (cart[i]['idb'] ?? cart[i]['id'] ?? '')
+                                      .toString(),
                                   nama: (cart[i]['nama'] ?? '').toString(),
-                                  harga: (cart[i]['harga'] as num?)?.toInt() ?? 0,
-                                  stock: (cart[i]['jumlah'] as num?)?.toInt() ?? 0,
+                                  harga:
+                                      (cart[i]['harga'] as num?)?.toInt() ?? 0,
+                                  stock:
+                                      (cart[i]['jumlah'] as num?)?.toInt() ?? 0,
                                   x: true,
                                   i: i,
-                                  jumbel: (cart[i]['jumlahbeli'] as num?)?.toInt() ?? 0,
+                                  jumbel: (cart[i]['jumlahbeli'] as num?)
+                                          ?.toInt() ??
+                                      0,
                                 ),
                             ],
                           ),
@@ -538,7 +571,8 @@ class _TransaksiState extends State<Transaksi> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.payment_rounded, color: Colors.white, size: 20),
+                        const Icon(Icons.payment_rounded,
+                            color: Colors.white, size: 20),
                         const SizedBox(width: 8),
                         Text(
                           uang.format(totalBayar),

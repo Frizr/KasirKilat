@@ -36,6 +36,11 @@ class _LaporanState extends State<Laporan> {
     }
   }
 
+  int _asInt(dynamic value) {
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,15 +85,17 @@ class _LaporanState extends State<Laporan> {
 
             for (var wrap in filteredTrx) {
               var trx = wrap['data'] as Map<String, dynamic>;
-              totalRevenue += (trx['bayar'] as num?)?.toInt() ?? 0;
+              totalRevenue += _asInt(trx['bayar']);
               var items = trx['data'] as List<dynamic>? ?? [];
               for (var it in items) {
+                if (it is! Map) continue;
                 String idb =
                     (it['idb'] ?? it['id'] ?? it['kode'] ?? '').toString();
-                int qty = (it['jumlahbeli'] as num?)?.toInt() ?? 0;
-                int revenue = (it['totharga'] as num?)?.toInt() ??
-                    ((it['harga'] as num?)?.toInt() ?? 0) * qty;
-                int modalVal = (it['modal'] as num?)?.toInt() ?? 0;
+                int qty = _asInt(it['jumlahbeli']);
+                int revenue = it['totharga'] == null
+                    ? _asInt(it['harga']) * qty
+                    : _asInt(it['totharga']);
+                int modalVal = _asInt(it['modal']);
                 int cost = modalVal * qty;
                 totalCost += cost;
                 if (!stats.containsKey(idb)) {
@@ -99,17 +106,17 @@ class _LaporanState extends State<Laporan> {
                     'cost': cost,
                   };
                 } else {
-                  stats[idb]!['qty'] = (stats[idb]!['qty'] as int) + qty;
+                  stats[idb]!['qty'] = _asInt(stats[idb]!['qty']) + qty;
                   stats[idb]!['revenue'] =
-                      (stats[idb]!['revenue'] as int) + revenue;
-                  stats[idb]!['cost'] = (stats[idb]!['cost'] as int) + cost;
+                      _asInt(stats[idb]!['revenue']) + revenue;
+                  stats[idb]!['cost'] = _asInt(stats[idb]!['cost']) + cost;
                 }
               }
             }
 
             var entries = stats.entries.toList();
             entries.sort((a, b) =>
-                (b.value['qty'] as int).compareTo(a.value['qty'] as int));
+                _asInt(b.value['qty']).compareTo(_asInt(a.value['qty'])));
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,8 +126,7 @@ class _LaporanState extends State<Laporan> {
                 const SizedBox(height: 16),
 
                 // Summary cards
-                _buildSummaryCards(
-                    totalRevenue, totalCost, filteredTrx.length),
+                _buildSummaryCards(totalRevenue, totalCost, filteredTrx.length),
                 const SizedBox(height: 20),
 
                 // Bar Chart
@@ -181,8 +187,7 @@ class _LaporanState extends State<Laporan> {
                       fontSize: 12,
                       fontWeight:
                           isActive ? FontWeight.bold : FontWeight.normal,
-                      color:
-                          isActive ? Colors.white : AppColors.textSecondary,
+                      color: isActive ? Colors.white : AppColors.textSecondary,
                     ),
                   ),
                 ),
@@ -307,7 +312,7 @@ class _LaporanState extends State<Laporan> {
   Widget _buildBarChart(TransaksiController tVal) {
     final data = tVal.getLast7DaysTotals();
     final maxVal = data.fold<int>(
-        0, (prev, e) => (e['total'] as int) > prev ? (e['total'] as int) : prev);
+        0, (prev, e) => _asInt(e['total']) > prev ? _asInt(e['total']) : prev);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -345,7 +350,7 @@ class _LaporanState extends State<Laporan> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: data.map((d) {
-                final total = d['total'] as int;
+                final total = _asInt(d['total']);
                 final date = d['date'] as DateTime;
                 double fraction = maxVal > 0 ? total / maxVal : 0;
                 if (fraction < 0.03 && total > 0) fraction = 0.03;
@@ -475,105 +480,106 @@ class _LaporanState extends State<Laporan> {
             int dayTotal = 0;
             for (var wrap in dayTrx) {
               var trx = wrap['data'] as Map<String, dynamic>;
-              dayTotal += (trx['bayar'] as num?)?.toInt() ?? 0;
+              dayTotal += _asInt(trx['bayar']);
             }
             DateTime date = DateTime.parse(dateKey);
-            bool isToday = dateKey ==
-                DateFormat('yyyy-MM-dd').format(DateTime.now());
+            bool isToday =
+                dateKey == DateFormat('yyyy-MM-dd').format(DateTime.now());
 
             return GestureDetector(
-              onTap: () {
-                _showDailyTransactions(context, date, dayTrx);
-              },
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isToday
-                    ? AppColors.teal.withOpacity(0.05)
-                    : AppColors.bgLight,
-                borderRadius: BorderRadius.circular(10),
-                border: isToday
-                    ? Border.all(color: AppColors.teal.withOpacity(0.2))
-                    : null,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: isToday
-                          ? AppColors.teal.withOpacity(0.1)
-                          : AppColors.navy.withOpacity(0.06),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          date.day.toString(),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: isToday
-                                ? AppColors.teal
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          DateFormat('MMM', 'id_ID').format(date),
-                          style: TextStyle(
-                            fontSize: 9,
-                            color: isToday
-                                ? AppColors.teal
-                                : AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
+                onTap: () {
+                  _showDailyTransactions(context, date, dayTrx);
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isToday
+                        ? AppColors.teal.withOpacity(0.05)
+                        : AppColors.bgLight,
+                    borderRadius: BorderRadius.circular(10),
+                    border: isToday
+                        ? Border.all(color: AppColors.teal.withOpacity(0.2))
+                        : null,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          DateFormat('EEEE', 'id_ID').format(date),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: isToday
+                              ? AppColors.teal.withOpacity(0.1)
+                              : AppColors.navy.withOpacity(0.06),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        Text(
-                          '${dayTrx.length} transaksi',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                          ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              date.day.toString(),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: isToday
+                                    ? AppColors.teal
+                                    : AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              DateFormat('MMM', 'id_ID').format(date),
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: isToday
+                                    ? AppColors.teal
+                                    : AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              DateFormat('EEEE', 'id_ID').format(date),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              '${dayTrx.length} transaksi',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        uang.format(dayTotal),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: isToday ? AppColors.teal : AppColors.navy,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    uang.format(dayTotal),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: isToday ? AppColors.teal : AppColors.navy,
-                    ),
-                  ),
-                ],
-              ),
-            ));
+                ));
           }),
         ],
       ),
     );
   }
 
-  void _showDailyTransactions(BuildContext context, DateTime date, List<dynamic> dayTrx) {
+  void _showDailyTransactions(
+      BuildContext context, DateTime date, List<dynamic> dayTrx) {
     String dateStr = DateFormat('dd MMMM yyyy', 'id_ID').format(date);
     Get.bottomSheet(
       Container(
@@ -601,10 +607,12 @@ class _LaporanState extends State<Laporan> {
                 itemBuilder: (context, index) {
                   var wrap = dayTrx[index];
                   var trx = wrap['data'] as Map<String, dynamic>;
-                  var bayar = (trx['bayar'] as num?)?.toInt() ?? 0;
+                  var bayar = _asInt(trx['bayar']);
                   var id = wrap['id'] ?? 'Unknown';
                   var tglDate = trx['tgl']?.toDate();
-                  String timeStr = tglDate != null ? DateFormat('HH:mm').format(tglDate) : '';
+                  String timeStr = tglDate != null
+                      ? DateFormat('HH:mm').format(tglDate)
+                      : '';
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const CircleAvatar(
@@ -613,9 +621,11 @@ class _LaporanState extends State<Laporan> {
                     ),
                     title: Text(
                       'Transaksi $id',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 13),
                     ),
-                    subtitle: Text(timeStr, style: const TextStyle(fontSize: 11)),
+                    subtitle:
+                        Text(timeStr, style: const TextStyle(fontSize: 11)),
                     trailing: Text(
                       uang.format(bayar),
                       style: const TextStyle(
@@ -636,7 +646,6 @@ class _LaporanState extends State<Laporan> {
   }
 
   Widget _buildTopProducts(
-
       List<MapEntry<String, Map<String, dynamic>>> entries) {
     if (entries.isEmpty) {
       return Container(
@@ -706,8 +715,9 @@ class _LaporanState extends State<Laporan> {
           ...entries.take(10).toList().asMap().entries.map((entry) {
             int index = entry.key;
             final v = entry.value.value;
-            int revenue = v['revenue'] as int;
-            int cost = v['cost'] as int;
+            int qty = _asInt(v['qty']);
+            int revenue = _asInt(v['revenue']);
+            int cost = _asInt(v['cost']);
             int profit = revenue - cost;
 
             Color medalColor;
@@ -763,7 +773,7 @@ class _LaporanState extends State<Laporan> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Terjual: ${v['qty']}  •  ${uang.format(revenue)}',
+                          'Terjual: $qty  •  ${uang.format(revenue)}',
                           style: const TextStyle(
                             fontSize: 11,
                             color: AppColors.textSecondary,
@@ -815,14 +825,16 @@ class _LaporanState extends State<Laporan> {
     Map<String, Map<String, dynamic>> stats = {};
     for (var wrap in t.transaksi) {
       var trx = wrap['data'] as Map<String, dynamic>;
-      totalRevenue += (trx['bayar'] as num?)?.toInt() ?? 0;
+      totalRevenue += _asInt(trx['bayar']);
       var items = trx['data'] as List<dynamic>? ?? [];
       for (var it in items) {
+        if (it is! Map) continue;
         String idb = (it['idb'] ?? it['id'] ?? it['kode'] ?? '').toString();
-        int qty = (it['jumlahbeli'] as num?)?.toInt() ?? 0;
-        int revenue = (it['totharga'] as num?)?.toInt() ??
-            ((it['harga'] as num?)?.toInt() ?? 0) * qty;
-        int modalVal = (it['modal'] as num?)?.toInt() ?? 0;
+        int qty = _asInt(it['jumlahbeli']);
+        int revenue = it['totharga'] == null
+            ? _asInt(it['harga']) * qty
+            : _asInt(it['totharga']);
+        int modalVal = _asInt(it['modal']);
         int cost = modalVal * qty;
         totalCost += cost;
         if (!stats.containsKey(idb)) {
@@ -833,9 +845,9 @@ class _LaporanState extends State<Laporan> {
             'cost': cost,
           };
         } else {
-          stats[idb]!['qty'] = (stats[idb]!['qty'] as int) + qty;
-          stats[idb]!['revenue'] = (stats[idb]!['revenue'] as int) + revenue;
-          stats[idb]!['cost'] = (stats[idb]!['cost'] as int) + cost;
+          stats[idb]!['qty'] = _asInt(stats[idb]!['qty']) + qty;
+          stats[idb]!['revenue'] = _asInt(stats[idb]!['revenue']) + revenue;
+          stats[idb]!['cost'] = _asInt(stats[idb]!['cost']) + cost;
         }
       }
     }
@@ -843,9 +855,9 @@ class _LaporanState extends State<Laporan> {
     List<List<String>> rows = [];
     rows.add(['Product ID', 'Name', 'Qty Sold', 'Revenue', 'Cost', 'Profit']);
     stats.forEach((id, v) {
-      int qty = v['qty'] as int;
-      int revenue = v['revenue'] as int;
-      int cost = v['cost'] as int;
+      int qty = _asInt(v['qty']);
+      int revenue = _asInt(v['revenue']);
+      int cost = _asInt(v['cost']);
       int profit = revenue - cost;
       rows.add([
         id,
@@ -878,8 +890,8 @@ class _LaporanState extends State<Laporan> {
         dir = await getApplicationDocumentsDirectory();
       }
       final path = dir?.path ?? '.';
-      final file = File(
-          '$path/laporan_${DateTime.now().millisecondsSinceEpoch}.csv');
+      final file =
+          File('$path/laporan_${DateTime.now().millisecondsSinceEpoch}.csv');
       await file.writeAsString(csv);
       Get.snackbar(
         'Sukses',

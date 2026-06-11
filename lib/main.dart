@@ -22,11 +22,11 @@ void main() async {
   await Permission.camera.request();
   await Permission.storage.request();
   await Firebase.initializeApp();
-  
+
   // Register controllers after Firebase is initialized
   Get.put(AuthController());
   Get.put(UserController());
-  
+
   await initializeDateFormatting('id_ID', null).then((_) => runApp(MyApp()));
 }
 
@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
       initialRoute: auth.isLoggedIn ? '/main' : '/login',
       getPages: [
         GetPage(name: '/login', page: () => const LoginPage()),
-        GetPage(name: '/main',  page: () => MainWrapper()),
+        GetPage(name: '/main', page: () => MainWrapper()),
       ],
     );
   }
@@ -132,7 +132,25 @@ class _MainWrapperState extends State<MainWrapper> {
 
   void _goToPage(int index) {
     if (index == 4) {
-      // Kelola is a full-screen route, not a PageView slide
+      final auth = Get.find<AuthController>();
+      if (!auth.isAdmin) {
+        Get.rawSnackbar(
+          messageText: const Text(
+            'Akses ditolak. Halaman ini hanya untuk admin.',
+            style: TextStyle(
+              fontFamily: 'm',
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          backgroundColor: AppColors.danger,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+        );
+        return;
+      }
+
+      // Kelola is a full-screen route, not a PageView slide.
       Get.to(() => const KelolaUserPage());
       return;
     }
@@ -172,8 +190,6 @@ class _MainWrapperState extends State<MainWrapper> {
                 Transaksi(),
                 Barang(),
                 Laporan(),
-                // Page 4 — Kelola (admin only, pushed via Get.to from nav item)
-                const KelolaPlaceholder(),
               ],
               onPageChanged: (value) {
                 setState(() {
