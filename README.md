@@ -1,11 +1,8 @@
-<<<<<<< HEAD
 # Kasir Kilat
 
 Kasir Kilat adalah aplikasi Point of Sales (POS) / Kasir digital modern yang dirancang khusus untuk UMKM (Usaha Mikro, Kecil, dan Menengah). Aplikasi ini dibangun dengan menggunakan arsitektur yang bersih, antarmuka yang elegan (tema Dark Navy & Teal), dan dukungan database real-time.
 
 ## 📸 Screenshot Aplikasi
-> **Catatan untuk Screenshot:** 
-> *(Silakan kirimkan screenshot aplikasi (Dashboard, Transaksi, Produk, Laporan) di chat, atau letakkan gambar tersebut di folder `assets/` dengan nama `dashboard.png`, `transaksi.png`, dll., lalu kita bisa mengupdate bagian ini.)*
 
 <div align="center">
   <img src="assets/dashboard.png" width="200" alt="Dashboard" />
@@ -13,6 +10,10 @@ Kasir Kilat adalah aplikasi Point of Sales (POS) / Kasir digital modern yang dir
   <img src="assets/transaksi.png" width="200" alt="Transaksi" />
   &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="assets/produk.png" width="200" alt="Produk" />
+  <br><br>
+  <img src="assets/laporan.png" width="200" alt="Laporan" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/tambah_produk.png" width="200" alt="Tambah Produk" />
 </div>
 
 ## ✨ Fitur Utama
@@ -76,17 +77,21 @@ Aplikasi ini memiliki 4 pilar fitur utama yang dapat diakses melalui navigasi ba
 
 ## 📁 Struktur Proyek (lib/)
 
-- `barang/`: Layar dan komponen untuk manajemen produk.
-- `controller/`: Logika state management GetX (contoh: `barangcontroller.dart`, `transaksicontroller.dart`).
-- `dashboard/`: Antarmuka layar utama/dashboard.
-- `laporan/`: Antarmuka dan logika pembuatan laporan penjualan (termasuk PDF dan Grafik).
-- `manage/`: Manajemen aplikasi tambahan.
-- `notification/`: Service untuk notifikasi lokal.
-- `theme/`: Definisi warna, tipografi, dan tema aplikasi (`app_colors.dart`, `app_theme.dart`).
-- `transaksi/`: Layar untuk mengelola transaksi POS.
+Proyek ini terstruktur menggunakan pendekatan pemisahan antara **Logika Bisnis (Controller)** dan **Antarmuka Pengguna (UI/View)** dengan memanfaatkan GetX. Berikut rincian isi dari folder `lib/`:
+
+| Direktori/File | Deskripsi & Tanggung Jawab |
+| :--- | :--- |
+| 🪪 **`auth/`** | Berisi tampilan antarmuka (UI) untuk Autentikasi seperti halaman Login pengguna. |
+| 📦 **`barang/`** | Layar antarmuka untuk manajemen produk, mencakup halaman daftar produk, tambah produk, dan edit data produk. |
+| 🧠 **`controller/`** | Inti dari *State Management* (GetX). Berisi semua logika bisnis, penghitungan, dan interaksi database Firestore (seperti `barangcontroller.dart`, `transaksicontroller.dart`, dan `authcontroller.dart`). |
+| 📊 **`dashboard/`** | Antarmuka layar utama aplikasi yang menampilkan metrik pendapatan, rangkuman stok, dan akses cepat (shortcut) ke menu lain. |
+| 📈 **`laporan/`** | Halaman untuk melihat detail laporan penjualan (harian/mingguan/bulanan) serta logika untuk *generate* dan mengunduh laporan PDF. |
+| ⚙️ **`manage/`** | Berisi *helper* dan fungsi utilitas pendukung seperti formatter mata uang (Rupiah), integrasi *barcode scanner*, dan *helpers* lainnya. |
+| 🔔 **`notification/`** | Pengaturan layanan notifikasi perangkat lokal (*Local Notifications*) untuk memberi alert tertentu kepada pengguna. |
+| 🧪 **`tesavejson/`** | Kumpulan *script* atau utilitas tambahan untuk pengujian dan pengelolaan data JSON secara lokal. |
+| 🎨 **`theme/`** | Menyimpan sistem desain (Design System). Terdiri dari definisi palet warna (`app_colors.dart`) dan konfigurasi tema global (`app_theme.dart`). |
+| 💱 **`transaksi/`** | Antarmuka halaman kasir utama (Point of Sales). Menampilkan list barang yang diklik, perhitungan harga dinamis, kembalian, dan proses checkout. |
+| 📄 **`main.dart`** | Titik masuk utama aplikasi (Entry Point). Mengatur inisialisasi Firebase, binding controller awal, dan routing aplikasi GetX. |
 
 ---
 *Dibuat untuk memudahkan operasional UMKM menjadi lebih cepat dan kilat!*
-=======
-cashier aplication using flutter firebase
->>>>>>> 9646e53f1d48b67941cbdfaf6c3fec75f51e7574
