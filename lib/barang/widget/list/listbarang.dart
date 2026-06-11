@@ -66,7 +66,6 @@ class _ListBarangState extends State<ListBarang> {
           ),
           const SizedBox(height: 8),
           GetBuilder<Getbarang>(
-            init: Getbarang(),
             builder: (val) {
               if (val.displayBarang.isEmpty) {
                 return Padding(
@@ -109,10 +108,9 @@ class _ListBarangState extends State<ListBarang> {
                       stock: (a['data'] != null && a['data']['jumlah'] != null)
                           ? (a['data']['jumlah'] as num).toInt()
                           : 0,
-                      modal:
-                          a['data'] != null && a['data'].containsKey('modal')
-                              ? (a['data']['modal'] as num).toInt()
-                              : 0,
+                      modal: a['data'] != null && a['data'].containsKey('modal')
+                          ? (a['data']['modal'] as num).toInt()
+                          : 0,
                     ),
                 ],
               );

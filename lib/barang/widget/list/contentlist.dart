@@ -30,7 +30,7 @@ class _ExpaState extends State<Expa> {
   TextEditingController stock = TextEditingController();
   TextEditingController modal = TextEditingController();
   bool ex = false;
-  Getbarang b = Get.put(Getbarang());
+  Getbarang b = Get.find<Getbarang>();
 
   @override
   void initState() {
@@ -155,169 +155,170 @@ class _ExpaState extends State<Expa> {
                   ],
                 )
               : null,
-        child: Theme(
-          data: ThemeData(fontFamily: 'm').copyWith(
-            dividerColor: Colors.transparent,
-          ),
-          child: ExpansionTile(
-            tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            backgroundColor: Colors.transparent,
-            collapsedBackgroundColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+          child: Theme(
+            data: ThemeData(fontFamily: 'm').copyWith(
+              dividerColor: Colors.transparent,
             ),
-            collapsedShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            leading: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.navy.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(12),
+            child: ExpansionTile(
+              tilePadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              backgroundColor: Colors.transparent,
+              collapsedBackgroundColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(Icons.inventory_2_outlined,
-                  color: AppColors.navy, size: 22),
-            ),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.nama,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: AppColors.textPrimary,
+              collapsedShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              leading: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.navy.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.inventory_2_outlined,
+                    color: AppColors.navy, size: 22),
+              ),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.nama,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: AppColors.textPrimary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
+                        const SizedBox(height: 3),
+                        Text(
+                          uang.format(widget.harga),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: _statusColor().withOpacity(0.1),
+                        ),
+                        child: Text(
+                          widget.stock.toString(),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: _statusColor(),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        uang.format(widget.harga),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: _statusColor().withOpacity(0.1),
-                      ),
-                      child: Text(
-                        widget.stock.toString(),
+                        _statusText(),
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 10,
                           color: _statusColor(),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      _statusText(),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: _statusColor(),
-                        fontWeight: FontWeight.bold,
+                    ],
+                  ),
+                ],
+              ),
+              trailing: AnimatedRotation(
+                turns: ex ? 0.25 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: const Icon(Icons.chevron_right_rounded,
+                    color: AppColors.textSecondary),
+              ),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Column(
+                    children: [
+                      _editField(label: 'Nama', c: nama),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                              child: _editField(
+                                  label: 'Harga',
+                                  c: harga,
+                                  tp: TextInputType.number)),
+                          const SizedBox(width: 10),
+                          Expanded(
+                              child: _editField(
+                                  label: 'Modal',
+                                  c: modal,
+                                  tp: TextInputType.number)),
+                          const SizedBox(width: 10),
+                          Expanded(
+                              child: _editField(
+                                  label: 'Stok',
+                                  c: stock,
+                                  tp: TextInputType.number)),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            trailing: AnimatedRotation(
-              turns: ex ? 0.25 : 0,
-              duration: const Duration(milliseconds: 200),
-              child: const Icon(Icons.chevron_right_rounded,
-                  color: AppColors.textSecondary),
-            ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: Column(
-                  children: [
-                    _editField(label: 'Nama', c: nama),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                            child: _editField(
-                                label: 'Harga',
-                                c: harga,
-                                tp: TextInputType.number)),
-                        const SizedBox(width: 10),
-                        Expanded(
-                            child: _editField(
-                                label: 'Modal',
-                                c: modal,
-                                tp: TextInputType.number)),
-                        const SizedBox(width: 10),
-                        Expanded(
-                            child: _editField(
-                                label: 'Stok',
-                                c: stock,
-                                tp: TextInputType.number)),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    if (isAdmin)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                        height: 40,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            b.editbarang(
-                              id: widget.id,
-                              nama: nama.text,
-                              harga: int.tryParse(harga.text) ?? 0,
-                              stock: int.tryParse(stock.text) ?? 0,
-                              modal: int.tryParse(modal.text) ?? 0,
-                            );
-                          },
-                          icon: const Icon(Icons.save_rounded, size: 18),
-                          label: const Text('Simpan',
-                              style: TextStyle(fontSize: 13)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.teal,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                      const SizedBox(height: 14),
+                      if (isAdmin)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                            height: 40,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                b.editbarang(
+                                  id: widget.id,
+                                  nama: nama.text,
+                                  harga: int.tryParse(harga.text) ?? 0,
+                                  stock: int.tryParse(stock.text) ?? 0,
+                                  modal: int.tryParse(modal.text) ?? 0,
+                                );
+                              },
+                              icon: const Icon(Icons.save_rounded, size: 18),
+                              label: const Text('Simpan',
+                                  style: TextStyle(fontSize: 13)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.teal,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-            onExpansionChanged: (value) {
-              setState(() {
-                if (value) {
-                  nama.text = widget.nama;
-                  harga.text = widget.harga.toString();
-                  stock.text = widget.stock.toString();
-                  modal.text = widget.modal.toString();
-                }
-                ex = value;
-              });
-            },
+              ],
+              onExpansionChanged: (value) {
+                setState(() {
+                  if (value) {
+                    nama.text = widget.nama;
+                    harga.text = widget.harga.toString();
+                    stock.text = widget.stock.toString();
+                    modal.text = widget.modal.toString();
+                  }
+                  ex = value;
+                });
+              },
+            ),
           ),
-        ),
         );
       }),
     );

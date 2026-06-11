@@ -1,80 +1,122 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AuthController extends GetxController {
-  // ── State ──────────────────────────────────────────────────────────────────
-  /// The currently logged-in user document (includes 'id' key injected on login).
-  /// null = no one is logged in.
+  /// The currently logged-in user document (includes an injected `id` key).
+  /// null means no user is logged in.
   final Rx<Map<String, dynamic>?> currentUser = Rx(null);
 
   /// True while a login/logout Firestore call is in progress.
   final RxBool isLoading = false.obs;
 
-  // ── Getters ────────────────────────────────────────────────────────────────
+  String get role =>
+      (currentUser.value?['role'] ?? '').toString().trim().toLowerCase();
   bool get isLoggedIn => currentUser.value != null;
-  bool get isAdmin => currentUser.value?['role'] == 'admin';
-  bool get isKaryawan => currentUser.value?['role'] == 'karyawan';
-  String get displayName => currentUser.value?['nama'] ?? '';
+  bool get isAdmin => role == 'admin';
+  bool get isKaryawan => role == 'karyawan';
+  String get displayName =>
+      (currentUser.value?['nama'] ?? '').toString().trim();
 
-  // ── Private ────────────────────────────────────────────────────────────────
   final CollectionReference _users =
       FirebaseFirestore.instance.collection('users');
 
-  // ── Methods ────────────────────────────────────────────────────────────────
-
-  /// Queries Firestore for a matching username/password and logs the user in.
+  /// Queries Firestore by username, then compares the demo plaintext password.
   Future<void> login(String username, String password) async {
     if (isLoading.value) return;
 
-    // Guard: empty fields
-    if (username.trim().isEmpty || password.trim().isEmpty) {
+    final normalizedUsername = username.trim().toLowerCase();
+    final normalizedPassword = password.trim();
+
+    if (normalizedUsername.isEmpty || normalizedPassword.isEmpty) {
       _showError('Username dan password tidak boleh kosong');
       return;
     }
 
     isLoading.value = true;
     try {
+      _debugAuth('Mencoba login username=$normalizedUsername');
+
       final QuerySnapshot snap = await _users
-          .where('username', isEqualTo: username.trim())
-          .limit(1)
-          .get();
+          .where('username', isEqualTo: normalizedUsername)
+          .limit(2)
+          .get()
+          .timeout(const Duration(seconds: 15));
 
       if (snap.docs.isEmpty) {
+        _debugAuth('Login gagal: username tidak ditemukan');
         _showError('Username tidak ditemukan');
         return;
       }
 
-      final doc = snap.docs.first;
-      final data = doc.data() as Map<String, dynamic>;
+      if (snap.docs.length > 1) {
+        _debugAuth(
+          'Peringatan: ditemukan ${snap.docs.length} dokumen untuk username yang sama',
+        );
+      }
 
-      // Check account status
-      if (data['aktif'] != true) {
+      final doc = snap.docs.first;
+      final rawData = doc.data();
+      if (rawData is! Map<String, dynamic>) {
+        _debugAuth('Login gagal: format dokumen users/${doc.id} tidak valid');
+        _showError('Data akun tidak valid. Hubungi admin.');
+        return;
+      }
+
+      final data = Map<String, dynamic>.from(rawData);
+      final isActive = data['aktif'] == true;
+      final storedPassword = (data['password'] ?? '').toString().trim();
+      final normalizedRole =
+          (data['role'] ?? '').toString().trim().toLowerCase();
+
+      if (!isActive) {
+        _debugAuth('Login gagal: akun nonaktif');
         _showError('Akun dinonaktifkan');
         return;
       }
 
-      // Check password
-      if (data['password'] != password) {
+      if (storedPassword != normalizedPassword) {
+        _debugAuth('Login gagal: password salah');
         _showError('Password salah');
         return;
       }
 
-      // Success — inject document ID into the map so callers can reference it
+      if (normalizedRole != 'admin' && normalizedRole != 'karyawan') {
+        _debugAuth('Login gagal: role tidak valid ($normalizedRole)');
+        _showError('Role akun tidak valid. Hubungi admin.');
+        return;
+      }
+
       currentUser.value = {
         ...data,
         'id': doc.id,
+        'username': normalizedUsername,
+        'role': normalizedRole,
       };
 
-      debugPrint('[AuthController] Login berhasil: ${data['username']} (${data['role']})');
-
-      // Navigate to main app shell
+      _debugAuth('Login berhasil: $normalizedUsername ($normalizedRole)');
       Get.offAllNamed('/main');
-    } catch (e) {
-      debugPrint('[AuthController] Login error: $e');
-      _showError('Terjadi kesalahan. Coba lagi.');
+    } on FirebaseException catch (e) {
+      _debugAuth(
+        'FirebaseException saat login: code=${e.code}, message=${e.message}',
+      );
+      _showError(_firebaseLoginMessage(e));
+    } on TimeoutException catch (e) {
+      _debugAuth('Timeout saat login: $e');
+      _showError('Koneksi ke Firestore timeout. Coba lagi.');
+    } catch (e, stack) {
+      _debugAuth('Unexpected login error: $e');
+      if (kDebugMode) {
+        debugPrint(stack.toString());
+      }
+      _showError(
+        kDebugMode
+            ? 'Login gagal: ${e.runtimeType}'
+            : 'Terjadi kesalahan saat login. Coba lagi.',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -83,18 +125,46 @@ class AuthController extends GetxController {
   /// Clears the current session and sends the user back to LoginPage.
   Future<void> logout() async {
     currentUser.value = null;
-    debugPrint('[AuthController] Logout berhasil.');
+    _debugAuth('Logout berhasil');
     Get.offAllNamed('/login');
   }
 
-  // ── Private helpers ────────────────────────────────────────────────────────
+  String _firebaseLoginMessage(FirebaseException e) {
+    switch (e.code) {
+      case 'permission-denied':
+        return kDebugMode
+            ? 'Akses Firestore ditolak. Periksa rules collection users. (${e.code})'
+            : 'Akses login ditolak. Hubungi admin.';
+      case 'unavailable':
+      case 'deadline-exceeded':
+        return 'Koneksi ke Firestore bermasalah. Periksa internet lalu coba lagi.';
+      case 'failed-precondition':
+        return kDebugMode
+            ? 'Query Firestore belum siap atau butuh index. (${e.code})'
+            : 'Konfigurasi database belum siap. Hubungi admin.';
+      case 'not-found':
+        return kDebugMode
+            ? 'Project/collection Firestore tidak ditemukan. (${e.code})'
+            : 'Database tidak ditemukan. Hubungi admin.';
+      default:
+        return kDebugMode
+            ? 'Login gagal: ${e.message ?? e.code} (${e.code})'
+            : 'Terjadi kesalahan saat login. Coba lagi.';
+    }
+  }
+
+  void _debugAuth(String message) {
+    if (kDebugMode) {
+      debugPrint('[AuthController] $message');
+    }
+  }
 
   void _showError(String message) {
     Get.rawSnackbar(
       margin: const EdgeInsets.all(16),
       borderRadius: 12,
-      backgroundColor: const Color(0xFFEF4444), // AppColors.danger
-      duration: const Duration(seconds: 3),
+      backgroundColor: const Color(0xFFEF4444),
+      duration: const Duration(seconds: 4),
       icon: const Padding(
         padding: EdgeInsets.only(left: 12),
         child: Icon(Icons.error_outline_rounded, color: Colors.white, size: 26),

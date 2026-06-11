@@ -19,9 +19,8 @@ class _KelolaUserPageState extends State<KelolaUserPage> {
   @override
   void initState() {
     super.initState();
-    // Guard: Kick out if not admin
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_auth.isKaryawan) {
+      if (!_auth.isAdmin) {
         Get.back();
         Get.rawSnackbar(
           messageText: const Text(
@@ -35,8 +34,17 @@ class _KelolaUserPageState extends State<KelolaUserPage> {
           margin: const EdgeInsets.all(16),
           borderRadius: 12,
         );
+        return;
       }
+
+      _userCtrl.fetchUsers();
     });
+  }
+
+  @override
+  void dispose() {
+    _userCtrl.stopListening();
+    super.dispose();
   }
 
   @override
@@ -57,6 +65,10 @@ class _KelolaUserPageState extends State<KelolaUserPage> {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Obx(() {
+        if (_userCtrl.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         if (_userCtrl.users.isEmpty) {
           return const Center(
             child: Text(
@@ -130,9 +142,8 @@ class _KelolaUserPageState extends State<KelolaUserPage> {
                               fontFamily: 'm',
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: isAdminRole
-                                  ? AppColors.navy
-                                  : AppColors.teal,
+                              color:
+                                  isAdminRole ? AppColors.navy : AppColors.teal,
                             ),
                           ),
                         ),
@@ -356,7 +367,8 @@ class _KelolaUserPageState extends State<KelolaUserPage> {
 
                               if (nm.isEmpty || un.isEmpty || pw.isEmpty) {
                                 Get.rawSnackbar(
-                                  messageText: const Text('Semua kolom harus diisi',
+                                  messageText: const Text(
+                                      'Semua kolom harus diisi',
                                       style: TextStyle(
                                           fontFamily: 'm',
                                           color: Colors.white,
@@ -415,8 +427,8 @@ class _KelolaUserPageState extends State<KelolaUserPage> {
       style: const TextStyle(fontFamily: 'm', fontSize: 14),
       decoration: InputDecoration(
         hintText: label,
-        hintStyle: const TextStyle(
-            fontFamily: 'm', fontSize: 13, color: Colors.grey),
+        hintStyle:
+            const TextStyle(fontFamily: 'm', fontSize: 13, color: Colors.grey),
         prefixIcon: Icon(icon, color: Colors.grey),
         filled: true,
         fillColor: AppColors.bgLight,
