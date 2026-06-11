@@ -29,7 +29,7 @@ class ListSearch extends StatefulWidget {
 }
 
 class _ListSearchState extends State<ListSearch> {
-  final Getbarang b = Get.put(Getbarang());
+  final Getbarang b = Get.find<Getbarang>();
   TextEditingController jumbel = TextEditingController();
 
   Widget by() {
@@ -86,7 +86,6 @@ class _ListSearchState extends State<ListSearch> {
                 decoration: InputDecoration(
                   suffixIcon: InkWell(
                     onTap: () {
-                      if (Get.isBottomSheetOpen == true) Get.back();
                       b.addbeli(
                         id: widget.id,
                         kode: widget.kode,
@@ -104,7 +103,8 @@ class _ListSearchState extends State<ListSearch> {
                         color: AppColors.teal,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.check, color: Colors.white, size: 20),
+                      child: const Icon(Icons.check,
+                          color: Colors.white, size: 20),
                     ),
                   ),
                   hintText: 'Jumlah barang',

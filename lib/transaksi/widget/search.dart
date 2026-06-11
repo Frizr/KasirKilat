@@ -10,7 +10,7 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
-  Getbarang b = Get.put(Getbarang());
+  Getbarang b = Get.find<Getbarang>();
   TextEditingController barang = TextEditingController();
 
   @override
@@ -62,7 +62,8 @@ class _SearchState extends State<Search> {
                   hintText: 'Cari barang...',
                   hintStyle: TextStyle(color: AppColors.textSecondary),
                   border: InputBorder.none,
-                  icon: Icon(Icons.search, color: AppColors.textSecondary, size: 20),
+                  icon: Icon(Icons.search,
+                      color: AppColors.textSecondary, size: 20),
                 ),
               ),
             ),
@@ -74,7 +75,6 @@ class _SearchState extends State<Search> {
                 children: [
                   const SizedBox(height: 8),
                   GetBuilder<Getbarang>(
-                    init: Getbarang(),
                     builder: (val) {
                       if (val.temu.isEmpty && barang.text.isNotEmpty) {
                         return Padding(
@@ -90,7 +90,8 @@ class _SearchState extends State<Search> {
                               Text(
                                 'Barang tidak ditemukan',
                                 style: TextStyle(
-                                  color: AppColors.textSecondary.withOpacity(0.5),
+                                  color:
+                                      AppColors.textSecondary.withOpacity(0.5),
                                   fontSize: 14,
                                 ),
                               ),

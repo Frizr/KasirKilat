@@ -14,7 +14,7 @@ class Barang extends StatefulWidget {
 }
 
 class _BarangState extends State<Barang> {
-  Getbarang b = Get.put(Getbarang());
+  Getbarang b = Get.find<Getbarang>();
   bool isSearching = false;
   TextEditingController searchController = TextEditingController();
 
@@ -79,7 +79,8 @@ class _BarangState extends State<Barang> {
                       }
                     });
                   },
-                  icon: Icon(isSearching ? Icons.close : Icons.search, color: AppColors.navy),
+                  icon: Icon(isSearching ? Icons.close : Icons.search,
+                      color: AppColors.navy),
                 ),
               ),
             ],
@@ -103,20 +104,20 @@ class _BarangState extends State<Barang> {
             final isAdmin = Get.find<AuthController>().isAdmin;
             if (!isAdmin || isKeyboardVisible) return const SizedBox.shrink();
             return FloatingActionButton.extended(
-                backgroundColor: AppColors.teal,
-                foregroundColor: Colors.white,
-                onPressed: () {
-                  Get.bottomSheet(
-                    AddBaranG(),
-                    isScrollControlled: true,
-                  );
-                },
-                icon: const Icon(Icons.add_rounded),
-                label: const Text(
-                  'Tambah Produk',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              );
+              backgroundColor: AppColors.teal,
+              foregroundColor: Colors.white,
+              onPressed: () {
+                Get.bottomSheet(
+                  AddBaranG(),
+                  isScrollControlled: true,
+                );
+              },
+              icon: const Icon(Icons.add_rounded),
+              label: const Text(
+                'Tambah Produk',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            );
           }),
         );
       },

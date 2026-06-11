@@ -11,7 +11,7 @@ class UserController extends GetxController {
       FirebaseFirestore.instance.collection('users');
 
   StreamSubscription? _sub;
-  
+
   // Real-time list of users
   final RxList<Map<String, dynamic>> users = <Map<String, dynamic>>[].obs;
   final RxBool isLoading = false.obs;
@@ -19,7 +19,8 @@ class UserController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchUsers();
+    // User list is admin-only. Start the listener from KelolaUserPage after
+    // the logged-in role is known, not during app startup/login.
   }
 
   @override
@@ -30,7 +31,15 @@ class UserController extends GetxController {
 
   /// Sets up a real-time listener for the 'users' collection
   void fetchUsers() {
+    final auth = Get.find<AuthController>();
+    if (!auth.isAdmin) {
+      debugPrint('[UserController] fetchUsers dibatalkan: bukan admin');
+      stopListening();
+      return;
+    }
+
     _sub?.cancel();
+    isLoading.value = true;
     _sub = _usersCollection
         .orderBy('createdAt', descending: true)
         .snapshots(includeMetadataChanges: true)
@@ -44,11 +53,20 @@ class UserController extends GetxController {
             ...data,
           });
         }
+        isLoading.value = false;
       },
       onError: (e) {
+        isLoading.value = false;
         debugPrint('[UserController] fetchUsers error: $e');
       },
     );
+  }
+
+  void stopListening() {
+    _sub?.cancel();
+    _sub = null;
+    users.clear();
+    isLoading.value = false;
   }
 
   /// Creates a new user if the username is unique
@@ -62,9 +80,26 @@ class UserController extends GetxController {
     isLoading.value = true;
 
     try {
+      final normalizedNama = nama.trim();
+      final normalizedUsername = username.trim().toLowerCase();
+      final normalizedPassword = password.trim();
+      final normalizedRole = role.trim().toLowerCase();
+
+      if (normalizedNama.isEmpty ||
+          normalizedUsername.isEmpty ||
+          normalizedPassword.isEmpty) {
+        _showError('Semua kolom harus diisi');
+        return false;
+      }
+
+      if (normalizedRole != 'admin' && normalizedRole != 'karyawan') {
+        _showError('Role tidak valid');
+        return false;
+      }
+
       // Check if username already exists
       final query = await _usersCollection
-          .where('username', isEqualTo: username.trim())
+          .where('username', isEqualTo: normalizedUsername)
           .limit(1)
           .get();
 
@@ -74,10 +109,10 @@ class UserController extends GetxController {
       }
 
       await _usersCollection.add({
-        'nama': nama.trim(),
-        'username': username.trim(),
-        'password': password,
-        'role': role,
+        'nama': normalizedNama,
+        'username': normalizedUsername,
+        'password': normalizedPassword,
+        'role': normalizedRole,
         'aktif': true,
         'createdAt': Timestamp.now(),
       });
@@ -96,7 +131,7 @@ class UserController extends GetxController {
   /// Deletes a user document
   Future<void> deleteUser(String docId) async {
     final auth = Get.find<AuthController>();
-    
+
     // Prevent deleting oneself
     if (auth.currentUser.value?['id'] == docId) {
       _showError('Tidak dapat menghapus akun Anda sendiri yang sedang aktif');
@@ -115,7 +150,7 @@ class UserController extends GetxController {
   /// Toggles the 'aktif' status of a user
   Future<void> toggleAktif(String docId, bool currentValue) async {
     final auth = Get.find<AuthController>();
-    
+
     // Prevent disabling oneself
     if (auth.currentUser.value?['id'] == docId) {
       _showError('Tidak dapat menonaktifkan akun Anda sendiri');
@@ -165,7 +200,8 @@ class UserController extends GetxController {
       duration: const Duration(seconds: 3),
       icon: const Padding(
         padding: EdgeInsets.only(left: 12),
-        child: Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 26),
+        child: Icon(Icons.check_circle_outline_rounded,
+            color: Colors.white, size: 26),
       ),
       messageText: Text(
         message,

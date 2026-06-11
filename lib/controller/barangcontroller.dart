@@ -32,36 +32,45 @@ class Getbarang extends GetxController {
           final data = element['data'] as Map<String, dynamic>?;
           final name = (data?['nama'] ?? '').toString().toLowerCase();
           final code = (data?['bar'] ?? '').toString().toLowerCase();
-          return name.contains(searchQueryBarang) || code.contains(searchQueryBarang);
+          return name.contains(searchQueryBarang) ||
+              code.contains(searchQueryBarang);
         } catch (e) {
           return element.toString().toLowerCase().contains(searchQueryBarang);
         }
       }).toList();
     }
-    
+
     // Sort
     if (sortOptionBarang == 'lama') {
       result.sort((a, b) {
-         final dateA = (a['data']?['tgl'] as Timestamp?)?.toDate() ?? DateTime.now();
-         final dateB = (b['data']?['tgl'] as Timestamp?)?.toDate() ?? DateTime.now();
-         return dateA.compareTo(dateB);
+        final dateA =
+            (a['data']?['tgl'] as Timestamp?)?.toDate() ?? DateTime.now();
+        final dateB =
+            (b['data']?['tgl'] as Timestamp?)?.toDate() ?? DateTime.now();
+        return dateA.compareTo(dateB);
       });
     } else if (sortOptionBarang == 'terbaru') {
       result.sort((a, b) {
-         final dateA = (a['data']?['tgl'] as Timestamp?)?.toDate() ?? DateTime.now();
-         final dateB = (b['data']?['tgl'] as Timestamp?)?.toDate() ?? DateTime.now();
-         return dateB.compareTo(dateA);
+        final dateA =
+            (a['data']?['tgl'] as Timestamp?)?.toDate() ?? DateTime.now();
+        final dateB =
+            (b['data']?['tgl'] as Timestamp?)?.toDate() ?? DateTime.now();
+        return dateB.compareTo(dateA);
       });
     } else if (sortOptionBarang == 'stock banyak') {
-      result.sort((a, b) => ((b['data']?['jumlah'] ?? 0) as num).compareTo((a['data']?['jumlah'] ?? 0) as num));
+      result.sort((a, b) => ((b['data']?['jumlah'] ?? 0) as num)
+          .compareTo((a['data']?['jumlah'] ?? 0) as num));
     } else if (sortOptionBarang == 'stock sedikit') {
-      result.sort((a, b) => ((a['data']?['jumlah'] ?? 0) as num).compareTo((b['data']?['jumlah'] ?? 0) as num));
+      result.sort((a, b) => ((a['data']?['jumlah'] ?? 0) as num)
+          .compareTo((b['data']?['jumlah'] ?? 0) as num));
     } else if (sortOptionBarang == 'harga tinggi') {
-      result.sort((a, b) => ((b['data']?['harga'] ?? 0) as num).compareTo((a['data']?['harga'] ?? 0) as num));
+      result.sort((a, b) => ((b['data']?['harga'] ?? 0) as num)
+          .compareTo((a['data']?['harga'] ?? 0) as num));
     } else if (sortOptionBarang == 'harga rendah') {
-      result.sort((a, b) => ((a['data']?['harga'] ?? 0) as num).compareTo((b['data']?['harga'] ?? 0) as num));
+      result.sort((a, b) => ((a['data']?['harga'] ?? 0) as num)
+          .compareTo((b['data']?['harga'] ?? 0) as num));
     }
-    
+
     return result;
   }
 
@@ -76,7 +85,7 @@ class Getbarang extends GetxController {
     update();
   }
 
-  addbeli(
+  bool addbeli(
       {required String kode,
       required String nama,
       required int harga,
@@ -84,6 +93,29 @@ class Getbarang extends GetxController {
       required String id,
       required int jumlahbeli,
       required int tot}) {
+    if (jumlah <= 0) {
+      _showError('Stok $nama habis');
+      return false;
+    }
+
+    if (jumlahbeli <= 0) {
+      _showError('Jumlah beli harus lebih dari 0');
+      return false;
+    }
+
+    final existingQty = beli.where((item) {
+      final itemId = (item['idb'] ?? item['id'] ?? '').toString();
+      return itemId == id;
+    }).fold<int>(
+      0,
+      (total, item) => total + ((item['jumlahbeli'] as num?)?.toInt() ?? 0),
+    );
+
+    if (existingQty + jumlahbeli > jumlah) {
+      _showError('Stok $nama tidak cukup. Sisa stok: $jumlah');
+      return false;
+    }
+
     beli.add({
       'idb': id,
       'kode': kode,
@@ -94,8 +126,11 @@ class Getbarang extends GetxController {
       'totharga': tot,
     });
     temu.clear();
-    Get.back();
+    if (Get.isBottomSheetOpen == true) {
+      Get.back();
+    }
     update();
+    return true;
   }
 
   cari({required String cari}) async {
@@ -231,6 +266,22 @@ class Getbarang extends GetxController {
       }
     }
     return total;
+  }
+
+  void _showError(String message) {
+    Get.rawSnackbar(
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12,
+      backgroundColor: Colors.red,
+      duration: const Duration(seconds: 3),
+      messageText: Text(
+        message,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
 
   @override
