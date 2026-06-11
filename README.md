@@ -3,8 +3,6 @@
 Kasir Kilat adalah aplikasi Point of Sales (POS) / Kasir digital modern yang dirancang khusus untuk UMKM (Usaha Mikro, Kecil, dan Menengah). Aplikasi ini dibangun dengan menggunakan arsitektur yang bersih, antarmuka yang elegan (tema Dark Navy & Teal), dan dukungan database real-time.
 
 ## 📸 Screenshot Aplikasi
-> **Catatan untuk Screenshot:** 
-> *(Silakan kirimkan screenshot aplikasi (Dashboard, Transaksi, Produk, Laporan) di chat, atau letakkan gambar tersebut di folder `assets/` dengan nama `dashboard.png`, `transaksi.png`, dll., lalu kita bisa mengupdate bagian ini.)*
 
 <div align="center">
   <img src="assets/dashboard.png" width="200" alt="Dashboard" />
