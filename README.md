@@ -113,7 +113,7 @@ Langkah setup:
 - `barang/`: Layar dan komponen untuk manajemen produk.
 - `controller/`: Logika state management GetX (contoh: `barangcontroller.dart`, `transaksicontroller.dart`).
 - `dashboard/`: Antarmuka layar utama/dashboard.
-- `laporan/`: Antarmuka dan logika pembuatan laporan penjualan (termasuk PDF dan Grafik).
+- `laporan/`: Antarmuka dan logika laporan penjualan, grafik, pembukuan, dan export CSV.
 - `manage/`: Manajemen aplikasi tambahan.
 - `notification/`: Service untuk notifikasi lokal.
 - `theme/`: Definisi warna, tipografi, dan tema aplikasi (`app_colors.dart`, `app_theme.dart`).
@@ -121,4 +121,4 @@ Langkah setup:
 
 ---
 *Dibuat untuk memudahkan operasional UMKM menjadi lebih cepat dan kilat!*
-=======
+
