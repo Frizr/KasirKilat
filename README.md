@@ -3,8 +3,6 @@
 Kasir Kilat adalah aplikasi Point of Sales (POS) / Kasir digital modern yang dirancang khusus untuk UMKM (Usaha Mikro, Kecil, dan Menengah). Aplikasi ini dibangun dengan menggunakan arsitektur yang bersih, antarmuka yang elegan (tema Dark Navy & Teal), dan dukungan database real-time.
 
 ## 📸 Screenshot Aplikasi
-> **Catatan untuk Screenshot:** 
-> *(Silakan kirimkan screenshot aplikasi (Dashboard, Transaksi, Produk, Laporan) di chat, atau letakkan gambar tersebut di folder `assets/` dengan nama `dashboard.png`, `transaksi.png`, dll., lalu kita bisa mengupdate bagian ini.)*
 
 <div align="center">
   <img src="assets/dashboard.png" width="200" alt="Dashboard" />
@@ -31,7 +29,7 @@ Aplikasi ini memiliki 4 pilar fitur utama yang dapat diakses melalui navigasi ba
    - Sinkronisasi otomatis dengan database cloud.
 4. **📈 Laporan**
    - Visualisasi data penjualan (Bar Charts).
-   - Pembuatan (generate) dokumen PDF untuk laporan penjualan.
+   - Pembuatan (generate) dokumen CSV untuk laporan penjualan.
 
 **Fitur Tambahan:**
 - **Real-time Synchronization:** Menggunakan Firebase Cloud Firestore untuk sinkronisasi data antar perangkat.
@@ -61,8 +59,8 @@ Aplikasi ini memiliki 4 pilar fitur utama yang dapat diakses melalui navigasi ba
 
 1. **Clone repositori ini** (jika menggunakan git):
    ```bash
-   git clone <url-repo-anda>
-   cd cashier-master\ tubes
+   git clone https://github.com/Frizr/KasirKilat.git
+   cd KasirKilat
    ```
 
 2. Ambil dependency Flutter:
@@ -117,7 +115,7 @@ Langkah setup:
 - `barang/`: Layar dan komponen untuk manajemen produk.
 - `controller/`: Logika state management GetX (contoh: `barangcontroller.dart`, `transaksicontroller.dart`).
 - `dashboard/`: Antarmuka layar utama/dashboard.
-- `laporan/`: Antarmuka dan logika pembuatan laporan penjualan (termasuk PDF dan Grafik).
+- `laporan/`: Antarmuka dan logika laporan penjualan, grafik, pembukuan, dan export CSV.
 - `manage/`: Manajemen aplikasi tambahan.
 - `notification/`: Service untuk notifikasi lokal.
 - `theme/`: Definisi warna, tipografi, dan tema aplikasi (`app_colors.dart`, `app_theme.dart`).
@@ -125,6 +123,4 @@ Langkah setup:
 
 ---
 *Dibuat untuk memudahkan operasional UMKM menjadi lebih cepat dan kilat!*
-=======
-cashier aplication using flutter firebase
->>>>>>> 9646e53f1d48b67941cbdfaf6c3fec75f51e7574
+
