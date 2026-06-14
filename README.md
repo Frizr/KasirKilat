@@ -57,8 +57,8 @@ Aplikasi ini memiliki 4 pilar fitur utama yang dapat diakses melalui navigasi ba
 
 1. **Clone repositori ini** (jika menggunakan git):
    ```bash
-   git clone <url-repo-anda>
-   cd cashier-master\ tubes
+   git clone https://github.com/Frizr/KasirKilat.git
+   cd KasirKilat
    ```
 
 2. Ambil dependency Flutter:
