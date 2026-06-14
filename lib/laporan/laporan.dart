@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cashier/controller/authcontroller.dart';
 import 'package:cashier/controller/transaksicontroller.dart';
+import 'package:cashier/laporan/pdf_export_service.dart';
 import 'package:cashier/manage/formater.dart';
 import 'package:cashier/theme/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +58,19 @@ class _LaporanState extends State<Laporan> {
           ),
         ),
         actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 4),
+            decoration: BoxDecoration(
+              color: AppColors.danger.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: IconButton(
+              onPressed: () => _exportPDF(),
+              icon: const Icon(Icons.picture_as_pdf_rounded,
+                  color: AppColors.danger),
+              tooltip: 'Export PDF',
+            ),
+          ),
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
@@ -906,6 +920,67 @@ class _LaporanState extends State<Laporan> {
       Get.snackbar(
         'Gagal',
         'Ekspor laporan gagal: $e',
+        backgroundColor: AppColors.danger,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+      );
+    }
+  }
+
+  void _exportPDF() async {
+    final t = Get.find<TransaksiController>();
+    final filteredTrx = _getFilteredTransactions(t);
+    final periodeLabel = _filterLabels[_selectedFilter];
+
+    // Show loading indicator
+    Get.dialog(
+      const Center(
+        child: CircularProgressIndicator(color: AppColors.teal),
+      ),
+      barrierDismissible: false,
+    );
+
+    try {
+      final file = await PdfExportService.generateReport(
+        filteredTrx: filteredTrx,
+        periodeLabel: periodeLabel,
+      );
+
+      // Dismiss the loading dialog
+      if (Get.isDialogOpen == true) Get.back();
+
+      if (file != null) {
+        // Show success and offer share/print
+        Get.snackbar(
+          'PDF Berhasil Dibuat',
+          'Laporan disimpan: ${file.path}',
+          backgroundColor: AppColors.success,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+          duration: const Duration(seconds: 4),
+          mainButton: TextButton(
+            onPressed: () => PdfExportService.sharePdf(file),
+            child: const Text(
+              'BUKA',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Dismiss the loading dialog
+      if (Get.isDialogOpen == true) Get.back();
+
+      Get.snackbar(
+        'Gagal',
+        'Ekspor PDF gagal: $e',
         backgroundColor: AppColors.danger,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,

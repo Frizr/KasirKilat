@@ -112,7 +112,7 @@ class _DashboardState extends State<Dashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '$greeting! 👋',
+                '$greeting! ',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -514,8 +514,9 @@ class _DashboardState extends State<Dashboard> {
                                 color: isToday
                                     ? AppColors.teal
                                     : AppColors.textSecondary,
-                                fontWeight:
-                                    isToday ? FontWeight.bold : FontWeight.normal,
+                                fontWeight: isToday
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                               ),
                             ),
                           ],
