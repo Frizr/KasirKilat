@@ -122,5 +122,3 @@ Langkah setup:
 ---
 *Dibuat untuk memudahkan operasional UMKM menjadi lebih cepat dan kilat!*
 =======
-cashier aplication using flutter firebase
->>>>>>> 9646e53f1d48b67941cbdfaf6c3fec75f51e7574
