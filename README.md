@@ -89,6 +89,8 @@ Aplikasi memiliki role pengguna, yaitu:
   <img src="assets/transaksi.png" width="220" alt="Transaksi" />
   &nbsp;&nbsp;&nbsp;
   <img src="assets/produk.png" width="220" alt="Produk" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="assets/laporan.png" width="220" alt="Laporan" />
 </div>
 
 ---
