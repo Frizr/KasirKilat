@@ -12,6 +12,8 @@ Kasir Kilat adalah aplikasi Point of Sales (POS) / Kasir digital modern yang dir
   <img src="assets/transaksi.png" width="200" alt="Transaksi" />
   &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="assets/produk.png" width="200" alt="Produk" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/laporan.png" width="200" alt="Laporan" />
 </div>
 
 ## ✨ Fitur Utama
