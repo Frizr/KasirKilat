@@ -12,7 +12,7 @@
 
 ## 📌 Deskripsi Project
 
-**Kasir Kilat** adalah aplikasi **Point of Sales (POS)** atau kasir digital yang dirancang untuk kebutuhan operasional UMKM. Aplikasi ini membantu pengguna dalam melakukan pencatatan transaksi, pengelolaan data produk, pemantauan stok, serta pembuatan laporan penjualan.
+**Kasir Kilat** adalah suatu aplikasi **Point of Sales (POS)** atau kasir digital yang dirancang untuk kebutuhan operasional UMKM. Aplikasi ini membantu pengguna dalam melakukan pencatatan transaksi, pengelolaan data produk, pemantauan stok, serta pembuatan laporan penjualan.
 
 Project ini dikembangkan menggunakan **Flutter** sebagai framework utama dan **Firebase Cloud Firestore** sebagai database real-time. Aplikasi ini juga menerapkan state management menggunakan **GetX** agar pengelolaan data dan navigasi lebih terstruktur.
 
