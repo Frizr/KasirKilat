@@ -27,7 +27,7 @@ Aplikasi ini memiliki 4 pilar fitur utama yang dapat diakses melalui navigasi ba
    - Sinkronisasi otomatis dengan database cloud.
 4. **📈 Laporan**
    - Visualisasi data penjualan (Bar Charts).
-   - Pembuatan (generate) dokumen PDF untuk laporan penjualan.
+   - Pembuatan (generate) dokumen CSV untuk laporan penjualan.
 
 **Fitur Tambahan:**
 - **Real-time Synchronization:** Menggunakan Firebase Cloud Firestore untuk sinkronisasi data antar perangkat.
