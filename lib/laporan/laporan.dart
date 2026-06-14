@@ -899,13 +899,23 @@ class _LaporanState extends State<Laporan> {
         .join('\n');
 
     try {
-      Directory? dir;
-      try {
-        dir = await getExternalStorageDirectory();
-      } catch (e) {
-        dir = await getApplicationDocumentsDirectory();
+      String path = '.';
+      if (Platform.isAndroid) {
+        path = '/storage/emulated/0/Download';
+        if (!await Directory(path).exists()) {
+          final dir = await getExternalStorageDirectory();
+          path = dir?.path ?? '.';
+        }
+      } else {
+        try {
+          final dir = await getDownloadsDirectory();
+          path = dir?.path ?? '';
+        } catch (_) {}
+        if (path.isEmpty) {
+          final dir = await getApplicationDocumentsDirectory();
+          path = dir.path;
+        }
       }
-      final path = dir?.path ?? '.';
       final file =
           File('$path/laporan_${DateTime.now().millisecondsSinceEpoch}.csv');
       await file.writeAsString(csv);

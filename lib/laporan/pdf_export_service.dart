@@ -544,14 +544,23 @@ class PdfExportService {
     // ── 3. Save the PDF file ────────────────────────────────────────────
     final bytes = await pdf.save();
 
-    Directory? dir;
-    try {
-      dir = await getExternalStorageDirectory();
-    } catch (_) {
-      dir = await getApplicationDocumentsDirectory();
+    String path = '.';
+    if (Platform.isAndroid) {
+      path = '/storage/emulated/0/Download';
+      if (!await Directory(path).exists()) {
+        final dir = await getExternalStorageDirectory();
+        path = dir?.path ?? '.';
+      }
+    } else {
+      try {
+        final dir = await getDownloadsDirectory();
+        path = dir?.path ?? '';
+      } catch (_) {}
+      if (path.isEmpty) {
+        final dir = await getApplicationDocumentsDirectory();
+        path = dir.path;
+      }
     }
-
-    final path = dir?.path ?? '.';
     final fileName =
         'laporan_penjualan_${DateFormat('yyyyMMdd_HHmmss').format(now)}.pdf';
     final file = File('$path/$fileName');
