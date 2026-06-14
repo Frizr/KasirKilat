@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'package:share_plus/share_plus.dart';
 
 class Laporan extends StatefulWidget {
   @override
@@ -907,15 +909,7 @@ class _LaporanState extends State<Laporan> {
       final file =
           File('$path/laporan_${DateTime.now().millisecondsSinceEpoch}.csv');
       await file.writeAsString(csv);
-      Get.snackbar(
-        'Sukses',
-        'Laporan diekspor: ${file.path}',
-        backgroundColor: AppColors.success,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-        borderRadius: 12,
-      );
+      _showExportSuccessDialog(file, 'CSV Berhasil Dibuat', 'Laporan disimpan:\n${file.path}', isPdf: false);
     } catch (e) {
       Get.snackbar(
         'Gagal',
@@ -952,27 +946,8 @@ class _LaporanState extends State<Laporan> {
       if (Get.isDialogOpen == true) Get.back();
 
       if (file != null) {
-        // Show success and offer share/print
-        Get.snackbar(
-          'PDF Berhasil Dibuat',
-          'Laporan disimpan: ${file.path}',
-          backgroundColor: AppColors.success,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(16),
-          borderRadius: 12,
-          duration: const Duration(seconds: 4),
-          mainButton: TextButton(
-            onPressed: () => PdfExportService.sharePdf(file),
-            child: const Text(
-              'BUKA',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        );
+        // Show success dialog
+        _showExportSuccessDialog(file, 'PDF Berhasil Dibuat', 'Laporan disimpan:\n${file.path}', isPdf: true);
       }
     } catch (e) {
       // Dismiss the loading dialog
@@ -988,5 +963,82 @@ class _LaporanState extends State<Laporan> {
         borderRadius: 12,
       );
     }
+  }
+
+  void _showExportSuccessDialog(File file, String title, String message, {bool isPdf = false}) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check_circle_outline_rounded, color: AppColors.success, size: 64),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Get.back();
+                        if (isPdf) {
+                          PdfExportService.sharePdf(file);
+                        } else {
+                          Share.shareXFiles([XFile(file.path)], text: 'Laporan Penjualan');
+                        }
+                      },
+                      icon: const Icon(Icons.share_rounded, size: 18),
+                      label: const Text('Bagikan'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.teal,
+                        side: const BorderSide(color: AppColors.teal),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Get.back();
+                        OpenFile.open(file.path);
+                      },
+                      icon: const Icon(Icons.file_open_rounded, size: 18),
+                      label: const Text('Buka File'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.teal,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => Get.back(),
+                child: const Text('Tutup', style: TextStyle(color: AppColors.textSecondary)),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
