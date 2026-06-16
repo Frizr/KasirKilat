@@ -16,6 +16,9 @@ class _KelolaUserPageState extends State<KelolaUserPage> {
   final AuthController _auth = Get.find<AuthController>();
   final UserController _userCtrl = Get.find<UserController>();
 
+  /// Dijalankan saat halaman pertama kali dimuat.
+  /// Memeriksa apakah pengguna yang login adalah Admin.
+  /// Jika bukan admin, halaman otomatis ditutup dan peringatan muncul.
   @override
   void initState() {
     super.initState();
@@ -41,12 +44,16 @@ class _KelolaUserPageState extends State<KelolaUserPage> {
     });
   }
 
+  /// Menghentikan listener pembacaan data realtime saat halaman ditutup
+  /// untuk menghemat memori dan koneksi
   @override
   void dispose() {
     _userCtrl.stopListening();
     super.dispose();
   }
 
+  /// Membangun antarmuka halaman Kelola Pengguna (hanya untuk Admin)
+  /// Berisi daftar pengguna/karyawan beserta tombol hapus dan toggle aktif/nonaktif
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -226,6 +233,8 @@ class _KelolaUserPageState extends State<KelolaUserPage> {
     );
   }
 
+  /// Memunculkan bottom sheet (jendela di bagian bawah layar)
+  /// yang berisi formulir untuk mendaftarkan akun karyawan baru
   void _showAddUserSheet() {
     final namaCtrl = TextEditingController();
     final usernameCtrl = TextEditingController();
@@ -417,6 +426,7 @@ class _KelolaUserPageState extends State<KelolaUserPage> {
     );
   }
 
+  /// Membuat widget form input teks standar dengan label dan ikon
   Widget _buildField({
     required TextEditingController ctrl,
     required String label,
@@ -445,6 +455,7 @@ class _KelolaUserPageState extends State<KelolaUserPage> {
 class KelolaPlaceholder extends StatelessWidget {
   const KelolaPlaceholder({super.key});
 
+  /// Merender halaman kosong transparan
   @override
   Widget build(BuildContext context) {
     return const Scaffold(

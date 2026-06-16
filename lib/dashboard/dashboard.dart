@@ -21,6 +21,8 @@ class _DashboardState extends State<Dashboard> {
   final TransaksiController t = Get.find<TransaksiController>();
   bool _alertShown = false;
 
+  /// Dijalankan saat halaman pertama kali dimuat.
+  /// Menampilkan peringatan stok menipis (jika ada) hanya satu kali.
   @override
   void initState() {
     super.initState();
@@ -32,6 +34,8 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
+  /// Membangun antarmuka utama halaman Dashboard.
+  /// Berisi Header, Kartu Ringkasan, Aksi Cepat, Grafik Penjualan, dan Peringatan Stok.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,6 +66,8 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  /// Membuat bagian atas dashboard (Header) yang berisi:
+  /// Salam (Selamat Pagi/Siang/Malam), tanggal hari ini, ikon notifikasi, dan tombol logout.
   Widget _buildHeader() {
     final now = DateTime.now();
     final dateStr = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(now);
@@ -205,6 +211,8 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  /// Membuat 4 kartu ringkasan penjualan (Penjualan Hari Ini, Transaksi Hari Ini,
+  /// Penjualan Bulan Ini, dan Jumlah Stok Menipis).
   Widget _buildSummaryCards() {
     return GetBuilder<TransaksiController>(
       builder: (tVal) {
@@ -427,6 +435,8 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  /// Membuat grafik batang (bar chart) yang menampilkan data pendapatan
+  /// selama 7 hari terakhir secara visual.
   Widget _buildChart() {
     return GetBuilder<TransaksiController>(
       builder: (tVal) {
@@ -543,6 +553,8 @@ class _DashboardState extends State<Dashboard> {
     return value.toString();
   }
 
+  /// Membuat daftar peringatan untuk produk-produk yang stoknya <= 10.
+  /// Akan menampilkan pesan 'Semua stok aman!' jika tidak ada stok menipis.
   Widget _buildLowStockAlerts() {
     return GetBuilder<Getbarang>(
       builder: (val) {
@@ -694,6 +706,7 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  /// Memunculkan jendela dialog konfirmasi sebelum pengguna benar-benar logout.
   void _showLogoutDialog() {
     Get.dialog(
       Dialog(

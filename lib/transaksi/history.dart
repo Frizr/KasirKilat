@@ -10,6 +10,8 @@ class History extends StatefulWidget {
 }
 
 class _HistoryState extends State<History> {
+  /// Membangun antarmuka halaman Riwayat Transaksi.
+  /// Menampilkan daftar seluruh transaksi yang telah terjadi.
   @override
   Widget build(BuildContext context) {
     return GetBuilder<TransaksiController>(

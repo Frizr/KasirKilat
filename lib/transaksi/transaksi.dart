@@ -19,6 +19,9 @@ class _TransaksiState extends State<Transaksi> {
   Getbarang b = Get.find<Getbarang>();
   final TextEditingController _searchController = TextEditingController();
 
+  /// Memunculkan jendela dialog pembayaran (Checkout).
+  /// Memungkinkan kasir memilih metode (Cash/QRIS), menghitung kembalian,
+  /// dan memproses transaksi ke database.
   void _showPaymentDialog(int totalBayar) {
     String selectedMetode = 'Cash';
     TextEditingController cashController = TextEditingController();
@@ -281,6 +284,7 @@ class _TransaksiState extends State<Transaksi> {
     );
   }
 
+  /// Membuat tombol pilihan (chip) untuk metode pembayaran (Cash/QRIS)
   Widget _paymentChip(
       String label, IconData icon, bool isSelected, VoidCallback onTap) {
     return InkWell(
@@ -319,12 +323,16 @@ class _TransaksiState extends State<Transaksi> {
     );
   }
 
+  /// Membersihkan penggunaan memori pada controller pencarian saat halaman ditutup
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
 
+  /// Membangun antarmuka halaman Kasir Utama.
+  /// Berisi kolom pencarian produk, daftar produk yang tersedia, daftar keranjang,
+  /// dan tombol "Bayar" di bagian bawah layar.
   @override
   Widget build(BuildContext context) {
     return Scaffold(

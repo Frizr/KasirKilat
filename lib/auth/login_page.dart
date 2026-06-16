@@ -22,6 +22,7 @@ class _LoginPageState extends State<LoginPage>
   late final AnimationController _fadeCtrl;
   late final Animation<double> _fadeAnim;
 
+  /// Menginisialisasi animasi (fade in) yang berjalan otomatis saat halaman pertama kali dibuka
   @override
   void initState() {
     super.initState();
@@ -32,6 +33,7 @@ class _LoginPageState extends State<LoginPage>
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
   }
 
+  /// Membersihkan penggunaan memori (controllers & animations) ketika halaman ditutup
   @override
   void dispose() {
     _usernameCtrl.dispose();
@@ -40,6 +42,8 @@ class _LoginPageState extends State<LoginPage>
     super.dispose();
   }
 
+  /// Mengecek apakah input username & password kosong.
+  /// Jika lolos pengecekan, fungsi ini memanggil fungsi login di AuthController.
   void _onLoginTap() {
     final username = _usernameCtrl.text.trim();
     final password = _passwordCtrl.text;
@@ -74,6 +78,7 @@ class _LoginPageState extends State<LoginPage>
     _auth.login(username, password);
   }
 
+  /// Membangun antarmuka halaman login, berisi: logo, judul aplikasi, dan form login
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -291,6 +296,7 @@ class _LoginPageState extends State<LoginPage>
 
   // ── Helper widgets ─────────────────────────────────────────────────────────
 
+  /// Membuat widget label (teks kecil tebal) untuk menandai fungsi sebuah kolom input
   Widget _buildLabel(String text) {
     return Text(
       text,
@@ -304,6 +310,7 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
+  /// Membuat dekorasi standar untuk kolom input teks agar seragam
   InputDecoration _inputDecoration({
     required String hint,
     required IconData prefixIcon,

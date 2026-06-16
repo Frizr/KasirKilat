@@ -17,6 +17,8 @@ class _AddBaranGState extends State<AddBaranG> {
   TextEditingController modal = TextEditingController();
   Getbarang b = Get.find<Getbarang>();
 
+  /// Membuat widget input teks (TextField) khusus yang memiliki label dan ikon
+  /// Digunakan secara berulang untuk input Nama, Harga, Modal, dan Stok
   Widget _inputField({
     required String label,
     required String hint,
@@ -67,9 +69,12 @@ class _AddBaranGState extends State<AddBaranG> {
     );
   }
 
+  /// Memeriksa apakah form penambahan produk sudah valid/terisi semua
+  /// Mengembalikan nilai true jika nama, harga, dan jumlah tidak kosong
   bool get _isValid =>
       nama.text.isNotEmpty && harga.text.isNotEmpty && jumlah.text.isNotEmpty;
 
+  /// Membangun antarmuka form 'Tambah Produk' yang muncul sebagai bottom sheet
   @override
   Widget build(BuildContext context) {
     return BackdropFilter(

@@ -26,6 +26,8 @@ class _LaporanState extends State<Laporan> {
     'Semua'
   ];
 
+  /// Mengembalikan daftar transaksi sesuai dengan rentang waktu yang dipilih
+  /// pada tab filter (Hari Ini, Minggu Ini, Bulan Ini, atau Semua).
   List _getFilteredTransactions(TransaksiController val) {
     switch (_selectedFilter) {
       case 0:
@@ -44,6 +46,9 @@ class _LaporanState extends State<Laporan> {
     return int.tryParse(value?.toString() ?? '') ?? 0;
   }
 
+  /// Membangun antarmuka halaman Laporan.
+  /// Menampilkan tombol export, tab filter waktu, kartu ringkasan keuangan,
+  /// grafik bar, pembukuan kasir (history harian), dan produk terlaris.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -164,6 +169,7 @@ class _LaporanState extends State<Laporan> {
     );
   }
 
+  /// Membuat tab pilihan (Hari Ini, Minggu Ini, dst) untuk menyaring data laporan.
   Widget _buildFilterTabs() {
     return Container(
       padding: const EdgeInsets.all(4),
@@ -215,6 +221,9 @@ class _LaporanState extends State<Laporan> {
     );
   }
 
+  /// Membuat 4 buah kartu metrik yang berisi rangkuman:
+  /// Total Penjualan, Total Modal, Laba/Rugi, dan Jumlah Transaksi.
+  /// (Total Modal dan Laba disembunyikan jika yang login bukan Admin).
   Widget _buildSummaryCards(int totalRevenue, int totalCost, int count) {
     int profit = totalRevenue - totalCost;
     return Column(
@@ -325,6 +334,7 @@ class _LaporanState extends State<Laporan> {
     );
   }
 
+  /// Membuat grafik batang yang menampilkan tren pendapatan selama 7 hari terakhir.
   Widget _buildBarChart(TransaksiController tVal) {
     final data = tVal.getLast7DaysTotals();
     final maxVal = data.fold<int>(
@@ -436,6 +446,7 @@ class _LaporanState extends State<Laporan> {
     return value.toString();
   }
 
+  /// Mengelompokkan transaksi per hari dan menampilkannya sebagai daftar pembukuan (History per hari).
   Widget _buildPembukuan(List filteredTrx) {
     // Group transactions by date
     Map<String, List<dynamic>> grouped = {};
@@ -594,6 +605,7 @@ class _LaporanState extends State<Laporan> {
     );
   }
 
+  /// Memunculkan bottom sheet untuk melihat rincian transaksi apa saja yang terjadi pada hari tersebut.
   void _showDailyTransactions(
       BuildContext context, DateTime date, List<dynamic> dayTrx) {
     String dateStr = DateFormat('dd MMMM yyyy', 'id_ID').format(date);
@@ -661,6 +673,8 @@ class _LaporanState extends State<Laporan> {
     );
   }
 
+  /// Menampilkan daftar 10 produk paling laku (terlaris) lengkap dengan jumlah terjual dan total pendapatan.
+  /// Produk top 1, 2, dan 3 akan diberikan warna badge medali khusus (emas, perak, perunggu).
   Widget _buildTopProducts(
       List<MapEntry<String, Map<String, dynamic>>> entries) {
     if (entries.isEmpty) {

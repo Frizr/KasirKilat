@@ -37,18 +37,22 @@ class _ExpaState extends State<Expa> {
     super.initState();
   }
 
+  /// Menentukan warna indikator stok berdasarkan jumlah stok yang tersisa
+  /// Merah untuk habis, kuning untuk hampir habis, hijau untuk tersedia
   Color _statusColor() {
     if (widget.stock <= 0) return AppColors.danger;
     if (widget.stock <= 10) return AppColors.warning;
     return AppColors.success;
   }
 
+  /// Menentukan teks label status stok berdasarkan jumlah stok yang tersisa
   String _statusText() {
     if (widget.stock <= 0) return 'Habis';
     if (widget.stock <= 10) return 'Hampir Habis';
     return 'Tersedia';
   }
 
+  /// Membuat widget input teks khusus untuk mode edit data produk
   Widget _editField({
     required String label,
     required TextEditingController c,
@@ -96,6 +100,8 @@ class _ExpaState extends State<Expa> {
     );
   }
 
+  /// Membangun antarmuka untuk satu buah item/kartu produk (Expa)
+  /// Mendukung fitur 'geser untuk hapus' (Slidable) dan 'tekan untuk edit' (ExpansionTile)
   @override
   Widget build(BuildContext context) {
     return Container(

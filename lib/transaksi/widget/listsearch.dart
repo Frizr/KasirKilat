@@ -32,6 +32,8 @@ class _ListSearchState extends State<ListSearch> {
   final Getbarang b = Get.find<Getbarang>();
   TextEditingController jumbel = TextEditingController();
 
+  /// Membangun antarmuka popup (bottom sheet) untuk memasukkan jumlah barang
+  /// yang ingin ditambahkan ke keranjang belanja.
   Widget by() {
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -118,6 +120,8 @@ class _ListSearchState extends State<ListSearch> {
     );
   }
 
+  /// Membangun antarmuka untuk satu item produk dalam daftar pencarian atau keranjang.
+  /// Menampilkan nama, harga, dan tombol tambah/hapus dari keranjang.
   @override
   Widget build(BuildContext context) {
     return Container(

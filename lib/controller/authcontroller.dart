@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AuthController extends GetxController {
-  /// The currently logged-in user document (includes an injected `id` key).
-  /// null means no user is logged in.
+  /// Dokumen pengguna yang saat ini sedang login (termasuk ID).
+  /// Bernilai null jika tidak ada yang login.
   final Rx<Map<String, dynamic>?> currentUser = Rx(null);
 
-  /// True while a login/logout Firestore call is in progress.
+  /// Bernilai true saat proses panggilan login/logout ke Firestore sedang berjalan.
   final RxBool isLoading = false.obs;
 
   String get role =>
@@ -24,7 +24,8 @@ class AuthController extends GetxController {
   final CollectionReference _users =
       FirebaseFirestore.instance.collection('users');
 
-  /// Queries Firestore by username, then compares the demo plaintext password.
+  /// Melakukan pencarian di Firestore berdasarkan username,
+  /// kemudian mencocokkan password-nya.
   Future<void> login(String username, String password) async {
     if (isLoading.value) return;
 
@@ -122,13 +123,14 @@ class AuthController extends GetxController {
     }
   }
 
-  /// Clears the current session and sends the user back to LoginPage.
+  /// Menghapus sesi login saat ini dan mengembalikan pengguna ke halaman Login.
   Future<void> logout() async {
     currentUser.value = null;
     _debugAuth('Logout berhasil');
     Get.offAllNamed('/login');
   }
 
+  /// Menerjemahkan kode error dari Firebase menjadi pesan bahasa Indonesia yang lebih ramah pengguna
   String _firebaseLoginMessage(FirebaseException e) {
     switch (e.code) {
       case 'permission-denied':
@@ -153,12 +155,14 @@ class AuthController extends GetxController {
     }
   }
 
+  /// Mencetak pesan log khusus auth saat aplikasi berjalan dalam mode Debug
   void _debugAuth(String message) {
     if (kDebugMode) {
       debugPrint('[AuthController] $message');
     }
   }
 
+  /// Menampilkan pesan error di layar menggunakan Snackbar berwarna merah
   void _showError(String message) {
     Get.rawSnackbar(
       margin: const EdgeInsets.all(16),

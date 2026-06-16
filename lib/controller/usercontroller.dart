@@ -16,20 +16,22 @@ class UserController extends GetxController {
   final RxList<Map<String, dynamic>> users = <Map<String, dynamic>>[].obs;
   final RxBool isLoading = false.obs;
 
+  /// Dipanggil saat controller diinisialisasi.
+  /// (Kosong, karena list user hanya boleh diakses Admin, dipanggil dari KelolaUserPage)
   @override
   void onInit() {
     super.onInit();
-    // User list is admin-only. Start the listener from KelolaUserPage after
-    // the logged-in role is known, not during app startup/login.
   }
 
+  /// Membersihkan listener saat controller dihancurkan untuk mencegah kebocoran memori
   @override
   void onClose() {
     _sub?.cancel();
     super.onClose();
   }
 
-  /// Sets up a real-time listener for the 'users' collection
+  /// Mengaktifkan pendengar (listener) realtime untuk koleksi 'users' di Firestore.
+  /// Hanya berjalan jika pengguna saat ini memiliki role Admin.
   void fetchUsers() {
     final auth = Get.find<AuthController>();
     if (!auth.isAdmin) {
@@ -62,6 +64,7 @@ class UserController extends GetxController {
     );
   }
 
+  /// Menghentikan listener dan membersihkan daftar pengguna
   void stopListening() {
     _sub?.cancel();
     _sub = null;
@@ -69,7 +72,8 @@ class UserController extends GetxController {
     isLoading.value = false;
   }
 
-  /// Creates a new user if the username is unique
+  /// Membuat akun pengguna/karyawan baru.
+  /// Akan memvalidasi apakah username sudah pernah digunakan atau belum.
   Future<bool> createUser({
     required String nama,
     required String username,
@@ -128,7 +132,8 @@ class UserController extends GetxController {
     }
   }
 
-  /// Deletes a user document
+  /// Menghapus dokumen pengguna/karyawan berdasarkan ID.
+  /// Mencegah pengguna menghapus akunnya sendiri yang sedang dipakai.
   Future<void> deleteUser(String docId) async {
     final auth = Get.find<AuthController>();
 
@@ -147,7 +152,8 @@ class UserController extends GetxController {
     }
   }
 
-  /// Toggles the 'aktif' status of a user
+  /// Mengubah (toggle) status 'aktif' dari seorang pengguna.
+  /// Jika nonaktif, pengguna tersebut tidak akan bisa login.
   Future<void> toggleAktif(String docId, bool currentValue) async {
     final auth = Get.find<AuthController>();
 
@@ -170,6 +176,7 @@ class UserController extends GetxController {
 
   // ── Private helpers ────────────────────────────────────────────────────────
 
+  /// Menampilkan pesan error (merah) menggunakan Snackbar
   void _showError(String message) {
     Get.rawSnackbar(
       margin: const EdgeInsets.all(16),
@@ -192,6 +199,7 @@ class UserController extends GetxController {
     );
   }
 
+  /// Menampilkan pesan sukses (hijau) menggunakan Snackbar
   void _showSuccess(String message) {
     Get.rawSnackbar(
       margin: const EdgeInsets.all(16),

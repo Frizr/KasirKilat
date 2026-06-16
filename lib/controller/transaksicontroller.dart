@@ -12,6 +12,9 @@ class TransaksiController extends GetxController {
   CollectionReference dbtransaksi =
       FirebaseFirestore.instance.collection('transaksi');
 
+  /// Menambahkan transaksi baru (Checkout).
+  /// Fungsi ini akan memvalidasi stok, menyimpan data ke koleksi 'transaksi',
+  /// dan mengurangi stok barang secara atomik (menggunakan Firestore Transaction).
   Future<bool> addtransaksi({
     required var data,
     required int bayar,
@@ -125,6 +128,8 @@ class TransaksiController extends GetxController {
     }
   }
 
+  /// Mengambil data seluruh riwayat transaksi secara realtime dari Firestore.
+  /// Diurutkan dari yang terbaru ke terlama.
   void gettransaksi() {
     _sub?.cancel();
     transaksi.clear();
@@ -150,7 +155,8 @@ class TransaksiController extends GetxController {
     );
   }
 
-  /// Returns transactions in [startInclusive, endExclusive).
+  /// Menyaring daftar transaksi berdasarkan rentang waktu tertentu.
+  /// Dimulai dari [startInclusive] hingga sebelum [endExclusive].
   List getTransaksiByDateRange(
     DateTime startInclusive,
     DateTime endExclusive,
@@ -167,12 +173,14 @@ class TransaksiController extends GetxController {
     }).toList();
   }
 
+  /// Mengambil daftar transaksi yang terjadi pada hari ini.
   List getTodayTransactions() {
     final start = _startOfDay(DateTime.now());
     final end = start.add(const Duration(days: 1));
     return getTransaksiByDateRange(start, end);
   }
 
+  /// Mengambil daftar transaksi yang terjadi di bulan ini.
   List getMonthTransactions() {
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, 1);
@@ -180,6 +188,7 @@ class TransaksiController extends GetxController {
     return getTransaksiByDateRange(start, end);
   }
 
+  /// Mengambil daftar transaksi selama seminggu terakhir (minggu ini).
   List getWeekTransactions() {
     final now = DateTime.now();
     final startOfToday = _startOfDay(now);
@@ -188,6 +197,7 @@ class TransaksiController extends GetxController {
     return getTransaksiByDateRange(start, end);
   }
 
+  /// Menghitung total nominal pendapatan dari sebuah daftar transaksi.
   int calculateTotal(List trxList) {
     int total = 0;
     for (final wrap in trxList) {
@@ -197,6 +207,8 @@ class TransaksiController extends GetxController {
     return total;
   }
 
+  /// Menghitung total nominal pendapatan per hari untuk 7 hari terakhir.
+  /// Berguna untuk menampilkan grafik.
   List<Map<String, dynamic>> getLast7DaysTotals() {
     final result = <Map<String, dynamic>>[];
     final now = DateTime.now();
@@ -214,6 +226,7 @@ class TransaksiController extends GetxController {
     return result;
   }
 
+  /// Menyiapkan data keranjang (mengubahnya menjadi format List of Maps) sebelum disimpan
   List<Map<String, dynamic>> _prepareItems(dynamic data) {
     final sourceItems = data is Iterable ? data : const [];
     final items = <Map<String, dynamic>>[];
@@ -227,6 +240,7 @@ class TransaksiController extends GetxController {
     return items;
   }
 
+  /// Mengelompokkan dan menghitung total jumlah (qty) tiap barang yang dibeli
   Map<String, int> _buildQtyMap(List<Map<String, dynamic>> items) {
     final qtyMap = <String, int>{};
     for (final item in items) {
@@ -284,12 +298,14 @@ class TransaksiController extends GetxController {
     }
   }
 
+  /// Mencetak pesan log khusus transaksi saat aplikasi berjalan dalam mode Debug
   void _debugTransaksi(String message) {
     if (kDebugMode) {
       debugPrint('[TransaksiController] $message');
     }
   }
 
+  /// Menampilkan pesan error di layar menggunakan Snackbar berwarna merah
   void _showError(String message) {
     Get.rawSnackbar(
       margin: const EdgeInsets.all(16),

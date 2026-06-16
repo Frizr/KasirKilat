@@ -14,16 +14,20 @@ class Getbarang extends GetxController {
   String searchQueryBarang = '';
   String sortOptionBarang = 'terbaru';
 
+  /// Mengatur kata kunci pencarian produk dan memperbarui UI
   void setSearchQueryBarang(String q) {
     searchQueryBarang = q.toLowerCase();
     update();
   }
 
+  /// Mengatur opsi pengurutan (sort) daftar produk dan memperbarui UI
   void setSortOptionBarang(String option) {
     sortOptionBarang = option;
     update();
   }
 
+  /// Mengambil daftar produk yang sudah difilter dan diurutkan
+  /// berdasarkan opsi pencarian dan pengurutan yang aktif
   List get displayBarang {
     List result = List.from(barang);
     if (searchQueryBarang.isNotEmpty) {
@@ -74,17 +78,21 @@ class Getbarang extends GetxController {
     return result;
   }
 
+  /// Menghapus semua barang dari keranjang belanja
   hapusbeliall() {
     beli.clear();
     update();
   }
 
+  /// Menghapus satu barang tertentu dari keranjang belanja berdasarkan index
   hapusbeli({required int i}) {
     beli.removeAt(i);
     print(beli);
     update();
   }
 
+  /// Menambahkan barang ke dalam keranjang belanja.
+  /// Memeriksa ketersediaan stok sebelum menambahkan barang.
   bool addbeli(
       {required String kode,
       required String nama,
@@ -133,6 +141,8 @@ class Getbarang extends GetxController {
     return true;
   }
 
+  /// Mencari produk berdasarkan nama atau kode barcode secara spesifik
+  /// Hasil pencarian disimpan dalam variabel `temu`
   cari({required String cari}) async {
     final q = cari.trim().toLowerCase();
     if (q.isEmpty) {
@@ -155,6 +165,8 @@ class Getbarang extends GetxController {
     update();
   }
 
+  /// Membaca/mengambil data produk secara realtime dari Firestore.
+  /// Data disortir berdasarkan tanggal (terbaru) dan disimpan di list `barang`.
   void getbarang() {
     _sub?.cancel();
     barang.clear();
@@ -179,6 +191,7 @@ class Getbarang extends GetxController {
     );
   }
 
+  /// Menambahkan produk baru ke database Firestore
   addbarang(
       {required String bar,
       required String nama,
@@ -196,6 +209,7 @@ class Getbarang extends GetxController {
     update();
   }
 
+  /// Mengubah/mengupdate data produk yang sudah ada di database
   editbarang(
       {required String id,
       required String nama,
@@ -211,6 +225,7 @@ class Getbarang extends GetxController {
     update();
   }
 
+  /// Menghapus produk dari database berdasarkan ID dan menampilkan notifikasi
   deletbarang({required String id, required String nama}) async {
     await dbbarang.doc(id).delete();
     Get.rawSnackbar(
@@ -237,7 +252,7 @@ class Getbarang extends GetxController {
     update();
   }
 
-  /// Get products with low stock
+  /// Mengambil daftar produk yang stoknya menipis (di bawah batas tertentu)
   List<Map<String, dynamic>> getLowStockProducts({int threshold = 5}) {
     List<Map<String, dynamic>> lowStock = [];
     for (var item in barang) {
@@ -256,7 +271,7 @@ class Getbarang extends GetxController {
     return lowStock;
   }
 
-  /// Get total stock count
+  /// Menghitung total jumlah stok semua produk
   int getTotalStock() {
     int total = 0;
     for (var item in barang) {
@@ -268,6 +283,7 @@ class Getbarang extends GetxController {
     return total;
   }
 
+  /// Menampilkan pesan error di layar menggunakan Snackbar
   void _showError(String message) {
     Get.rawSnackbar(
       margin: const EdgeInsets.all(16),

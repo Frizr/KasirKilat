@@ -9,14 +9,12 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 class PdfExportService {
-  /// Generates and saves a professional sales report PDF.
+  /// Membuat dan menyimpan file PDF laporan penjualan.
   ///
-  /// [filteredTrx] — list of transaction wrappers (same structure used in the
-  /// CSV export: each element is `{'id': ..., 'data': {...}}`).
+  /// [filteredTrx] — daftar transaksi (diambil dari controller) yang akan direkap.
+  /// [periodeLabel] — label periode waktu (contoh: "Hari Ini", "Bulan Ini").
   ///
-  /// [periodeLabel] — human-readable period label, e.g. "Hari Ini", "Bulan Ini".
-  ///
-  /// Returns the saved [File] on success, or `null` on failure.
+  /// Mengembalikan [File] PDF jika berhasil, atau `null` jika gagal.
   static Future<File?> generateReport({
     required List filteredTrx,
     required String periodeLabel,
@@ -569,7 +567,7 @@ class PdfExportService {
     return file;
   }
 
-  /// Opens the system share / print dialog for the generated PDF.
+  /// Membuka dialog sistem untuk membagikan (Share) atau mencetak (Print) file PDF yang telah dibuat.
   static Future<void> sharePdf(File file) async {
     await Printing.sharePdf(
       bytes: await file.readAsBytes(),

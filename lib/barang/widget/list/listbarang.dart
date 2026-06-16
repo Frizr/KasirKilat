@@ -11,6 +11,9 @@ class ListBarang extends StatefulWidget {
 }
 
 class _ListBarangState extends State<ListBarang> {
+  /// Membangun antarmuka yang menampilkan seluruh daftar produk.
+  /// Menampilkan judul, tombol filter, dan iterasi data produk menggunakan widget Expa.
+  /// Jika daftar produk kosong, akan menampilkan pesan 'Belum ada produk'.
   @override
   Widget build(BuildContext context) {
     return Padding(

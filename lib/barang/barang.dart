@@ -18,12 +18,17 @@ class _BarangState extends State<Barang> {
   bool isSearching = false;
   TextEditingController searchController = TextEditingController();
 
+  /// Membersihkan *controller* memori saat halaman ditutup untuk mencegah kebocoran memori (memory leak)
   @override
   void dispose() {
     searchController.dispose();
     super.dispose();
   }
 
+  /// Membangun antarmuka utama halaman Produk, termasuk:
+  /// - AppBar dengan fitur pencarian
+  /// - Daftar produk (`ListBarang`)
+  /// - Tombol mengambang (FAB) "Tambah Produk" untuk akses Admin
   @override
   Widget build(BuildContext context) {
     return KeyboardVisibilityBuilder(
