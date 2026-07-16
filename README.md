@@ -97,12 +97,13 @@ Aplikasi memiliki role pengguna, yaitu:
 
 ## 🛠️ Teknologi yang Digunakan
 
-| Teknologi          | Keterangan                                                          |
-| ------------------ | ------------------------------------------------------------------- |
-| Flutter            | Framework utama untuk pengembangan aplikasi mobile                  |
-| Dart               | Bahasa pemrograman yang digunakan pada Flutter                      |
-| Firebase Core      | Konfigurasi utama Firebase                                          |
-| Cloud Firestore    | Database real-time untuk menyimpan data user, barang, dan transaksi |
+| Teknologi       | Keterangan                                                          |
+| --------------- | ------------------------------------------------------------------- |
+| Flutter         | Framework utama untuk pengembangan aplikasi mobile                  |
+| Dart            | Bahasa pemrograman yang digunakan pada Flutter                      |
+| Firebase Core   | Konfigurasi utama Firebase                                          |
+| Cloud Firestore | Database real-time untuk menyimpan data user, barang, dan transaksi |
+| Firebase Auth   | Autentikasi pengguna                                                |
 
 ---
 
@@ -151,13 +152,13 @@ Contoh field:
 
 Contoh field:
 
-| Field  | Tipe Data | Keterangan          |
-| ------ | --------- | ------------------- |
-| nama   | String    | Nama barang         |
-| harga  | Number    | Harga jual barang   |
-| modal  | Number    | Harga modal barang  |
-| jumlah | Number    | Jumlah stok barang  |
-| tgl    | Timestamp | Waktu data dibuat   |
+| Field  | Tipe Data | Keterangan         |
+| ------ | --------- | ------------------ |
+| nama   | String    | Nama barang        |
+| harga  | Number    | Harga jual barang  |
+| modal  | Number    | Harga modal barang |
+| jumlah | Number    | Jumlah stok barang |
+| tgl    | Timestamp | Waktu data dibuat  |
 
 ### Collection `transaksi`
 
@@ -286,8 +287,6 @@ Project sudah menyelesaikan fitur utama aplikasi POS, meliputi:
 | Ardy Ferdinand Christanto Mongdong | Mengembangkan fitur manajemen produk                      |
 | Mohammad Afrizal Rizky Setyawan    | Mengembangkan fitur transaksi penjualan                   |
 | Athallah Zaki Ramatiansyah         | Mengembangkan dashboard dan laporan dan integrasi backend |
-
-> Silakan sesuaikan nama anggota dan kontribusi sesuai pembagian tugas kelompok.
 
 ---
 
