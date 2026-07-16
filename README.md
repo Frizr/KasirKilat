@@ -103,13 +103,6 @@ Aplikasi memiliki role pengguna, yaitu:
 | Dart               | Bahasa pemrograman yang digunakan pada Flutter                      |
 | Firebase Core      | Konfigurasi utama Firebase                                          |
 | Cloud Firestore    | Database real-time untuk menyimpan data user, barang, dan transaksi |
-| Firebase Storage   | Penyimpanan file/gambar jika diperlukan                             |
-| GetX               | State management dan navigasi                                       |
-| Intl               | Format tanggal dan mata uang                                        |
-| Mobile Scanner     | Scanner barcode/QR                                                  |
-| Permission Handler | Mengelola izin akses perangkat                                      |
-| Path Provider      | Mengakses direktori penyimpanan lokal                               |
-| Lottie             | Animasi pada tampilan aplikasi                                      |
 
 ---
 
@@ -160,7 +153,6 @@ Contoh field:
 
 | Field  | Tipe Data | Keterangan          |
 | ------ | --------- | ------------------- |
-| bar    | String    | Kode/barcode barang |
 | nama   | String    | Nama barang         |
 | harga  | Number    | Harga jual barang   |
 | modal  | Number    | Harga modal barang  |
